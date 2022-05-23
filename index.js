@@ -2,8 +2,8 @@
 var game = (async function() {
     // Affichage
     var cvs = document.getElementById("aff");
-    /*var*/ renderer = new Renderer(cvs, true);
-    /*var */camera = new Camera([0,-1,-10.0], [0,0,0], [Math.PI/5, Math.PI/4, 0]);
+    var renderer = new Renderer(cvs, true);
+    var camera = new Camera([0,-1,-10.0], [0,0,0], [Math.PI/5, Math.PI/4, 0]);
     window.addEventListener("resize", function() {
         cvs.width = cvs.clientWidth*(window.devicePixelRatio||1);
         cvs.height = cvs.clientHeight*(window.devicePixelRatio||1);
@@ -12,13 +12,13 @@ var game = (async function() {
     var fonts = [];
     fonts["Arial"] = await loadFontFromAssets("Arial");
     // Chargement des modèles
-    /*var*/ models = {
+    var models = {
     	player: {voxels:[{pos:[0,0.5,0],scale:[1,1,1],color:[.8,.2,.2,1],rotation:[0,0,0],origin:[0,.5,0]}], scale:.5},
     	cube: {voxels:[{pos:[0,0,0],scale:[1,1,1],color:[1,1,1,1],rotation:[0,0,0],origin:[0,0,0]}], scale:1},
     	sea: {"voxels":[{"pos":[0,.4,0], "scale":[200,0,200], "colors":[null,null,[0,.4,.9,.7],null,null,[0,.4,.9,.7]]}]},
     	ground: {"voxels":[{"pos":[0,0,0], "scale":[200,0.1,200], "colors":[null,null,[0.933, 0.858, 0.647, 1],null,null,[0.768, 0.709, 0.537, 1]]}]},
     	sun: {"voxels":[{"pos":[0,0,0], "scale":[2,2,2], "color":[1,1,.4,1]}]}
-    }
+    };
     for (let modelName of ["sardine","bee","boards","plank","stonks","cat","bottle","box"]) {
         models[modelName] = await loadModelFromAssets(modelName);
         //loadModelFromAssets(modelName).then(model => models[modelName] = model);
@@ -33,14 +33,15 @@ var game = (async function() {
     world.entities.push(new FlyingEntity(world, "bee", [0,2,0], "fly", 1, 2, {minX:-20, maxX:20, minY:0.5, maxY:4, minZ:-20, maxZ:20}));
     world.entities.push(new DriftingEntity(world, "plank", [4,0.4,1], undefined, 1, {minX:-20, maxX:20, minZ:-20, maxZ:20}));
     world.entities.push(new Entity(world, "ground", [0,-10,0]));
-    world.entities.push(sun = new Entity(world, "sun", [50,0,0]));
+    var sun = new Entity(world, "sun", [50,0,0]);
+    world.entities.push(sun);
     world.entities.push(new Entity(world, "sea", [0,0,0]));
-    /*var*/ inventory = new Inventory(24,16);
+    var inventory = new Inventory(24,16);
     // Gestion des inputs
     var keys = [["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],["GamepadAxe1","directionZ"], ["KeyC","action"],["GamepadButton0","action"], ["Escape","menu"],["GamepadButton16","menu"], ["GamepadButton8","zoomout"],["Minus","zoomout"], ["GamepadButton9","zoomin"],["Equal","zoomin"], ["GamepadButton3","inventory"],["KeyE","inventory"], ["Space","jump"],["GamepadButton2","jump"], ["GamepadAxe2","cameraRotateY"],["GamepadAxe3","cameraRotateX"],["MouseGrabMoveX","cameraRotateY"],["MouseGrabMoveY","cameraRotateX"],["MouseButton0","click"], ["GamepadButton6","run"],["ShiftLeft","run"]];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
-    /*var*/ interfaces = {};
+    var interfaces = {};
     {
         interfaces.menu = new InterfaceDiv();
         interfaces.menu.add(new InterfaceText("Menu", fonts.Arial, 0.15));
@@ -179,9 +180,9 @@ var game = (async function() {
 		last = now;
 		camera.setTargetPos(player.getPos());
 		renderer.drawWorld(world, models, camera, deltaTime);
-		for (const [name,interface] of Object.entries(interfaces))
-		    if (interface.isVisible())
-		        interface.draw(renderer, 0, 0, 1);
+		for (const [name,interfacee] of Object.entries(interfaces))
+		    if (interfacee.isVisible())
+		        interfacee.draw(renderer, 0, 0, 1);
 		renderer.drawText(player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
 		renderer.drawText(fps+" fps", fonts.Arial, -1, 0.95, .05, [1,1,1,1], "left", "top");
 		

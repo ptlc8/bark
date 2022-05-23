@@ -3,10 +3,11 @@
     <head>
         <meta charset="UTF-8" />
         <title>Création - Bark bark !</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
-        <script src="renderer3.js"></script>
-        <script src="world.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+        <script defer src="renderer3.js"></script>
+        <script defer src="world.js"></script>
         <link rel="stylesheet" href="create.css" />
+        <script defer src="create.js"></script>
     </head>
     <body>
         <canvas id="aff"></canvas>
@@ -174,6 +175,5 @@
             <button onclick="copyJSON()">Copier le JSON</button>
             <button onclick="loadFromClipboard()">Charger depuis un JSON</button>
         </fieldset>
-        <script src="create.js"></script>
     </body>
 </html>
