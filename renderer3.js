@@ -1,5 +1,6 @@
+"use strict";
 // public
-var Renderer = function() {
+var Renderer = (function() {
 	// private static final
 	const vertexShaderSource = `
 	  #define PI 3.1415926538
@@ -70,7 +71,7 @@ var Renderer = function() {
 		gl.shaderSource(shader, source);
 		gl.compileShader(shader);
 		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+			alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
 			gl.deleteShader(shader);
 			return null;
 		}
@@ -86,7 +87,7 @@ var Renderer = function() {
 		gl.attachShader(shaderProgram, fragmentShader);
 		gl.linkProgram(shaderProgram);
 		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-			alert('Impossible d\'initialiser le programme shader : ' + gl.getProgramInfoLog(shaderProgram));
+			alert("Impossible d'initialiser le programme shader : " + gl.getProgramInfoLog(shaderProgram));
 			return null;
 		}
 		return shaderProgram;
@@ -112,20 +113,20 @@ var Renderer = function() {
 		this.programInfo = {
 			program: shaderProgram,
 			attribLocations: {
-				vertexPosition: this.gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-				vertexNormal: this.gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
-				vertexColor: this.gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-				vertexTransform: this.gl.getAttribLocation(shaderProgram, 'aVertexTransform'),
-				faceOrient: this.gl.getAttribLocation(shaderProgram, 'aFaceOrient'),
-				vertexScale: this.gl.getAttribLocation(shaderProgram, 'aVertexScale')
+				vertexPosition: this.gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+				vertexNormal: this.gl.getAttribLocation(shaderProgram, "aVertexNormal"),
+				vertexColor: this.gl.getAttribLocation(shaderProgram, "aVertexColor"),
+				vertexTransform: this.gl.getAttribLocation(shaderProgram, "aVertexTransform"),
+				faceOrient: this.gl.getAttribLocation(shaderProgram, "aFaceOrient"),
+				vertexScale: this.gl.getAttribLocation(shaderProgram, "aVertexScale")
 			},
 			uniformLocations: {
-				projectionMatrix: this.gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-				cameraMatrix: this.gl.getUniformLocation(shaderProgram, 'uCameraMatrix'),
-				viewMatrix: this.gl.getUniformLocation(shaderProgram, 'uViewMatrix'),
-				ambientLight: this.gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
-				directionalLightColor: this.gl.getUniformLocation(shaderProgram, 'uDirectionalLightColor'),
-				directionalLightVector: this.gl.getUniformLocation(shaderProgram, 'uDirectionalLightVector')
+				projectionMatrix: this.gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
+				cameraMatrix: this.gl.getUniformLocation(shaderProgram, "uCameraMatrix"),
+				viewMatrix: this.gl.getUniformLocation(shaderProgram, "uViewMatrix"),
+				ambientLight: this.gl.getUniformLocation(shaderProgram, "uAmbientLight"),
+				directionalLightColor: this.gl.getUniformLocation(shaderProgram, "uDirectionalLightColor"),
+				directionalLightVector: this.gl.getUniformLocation(shaderProgram, "uDirectionalLightVector")
 			}
 		};
 		this.debug = debug;
@@ -217,7 +218,7 @@ var Renderer = function() {
     		i++;
 		}*/
 		this.gl.drawElementsInstanced(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0, buffers.colors.length/4);
-	}
+	};
 	
 	// private static
 	function calcAnimValue(keyframes, duration, start=0, debug=false) {
@@ -243,7 +244,7 @@ var Renderer = function() {
 		if (debug) console.log({t,startT,startValue,endT,endValue,func})
 	    return startValue+(EasingFunctions[func]||EasingFunctions.linear)((t-startT)/(endT-startT))*(endValue-startValue);
 	}
-	window.calcAnimValue = calcAnimValue
+	window.calcAnimValue = calcAnimValue;
 	// private static
 	function calcAnim(model, anim=undefined, start=0) {
 		var a = {pos:[0,0,0],scale:[1,1,1],origin:[0,0,0],rot:[0,0,0]};
@@ -303,11 +304,11 @@ var Renderer = function() {
 				normals.push([normal[0],normal[1],normal[2]]);
 			}
 			// calcul de la transformation du voxel
-			vTransform = mat4.create();
+			var vTransform = mat4.create();
 			mat4.translate(vTransform, vTransform, voxel.pos);
 			mat4.translate(vTransform, vTransform, anim.pos);
 			if (voxel.origin)
-				mat4.translate(vTransform, vTransform, voxel.origin)
+				mat4.translate(vTransform, vTransform, voxel.origin);
 			if (voxel.rotation) {
 				mat4.rotateZ(vTransform, vTransform, (voxel.rotation[2]+anim.rot[2])/180*Math.PI);
 				mat4.rotateY(vTransform, vTransform, (voxel.rotation[1]+anim.rot[1])/180*Math.PI);
@@ -403,7 +404,7 @@ var Renderer = function() {
 			orients: allOrients,
 			scales: allScales
 		}, projectionMatrix, camera.getViewMatrix(world.getTickProgress()), world.getTickProgress(), world.getLights(), world.getSkybox());
-	}
+	};
 	
 	Renderer.prototype.drawAxis = function(rotation) {
 		// Initialisation du programme 
@@ -430,11 +431,11 @@ var Renderer = function() {
 			this.axisProgramInfo = {
 				program: shaderProgram,
 				attribLocations: {
-					vertexPosition: this.gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-					vertexColor: this.gl.getAttribLocation(shaderProgram, 'aVertexColor')
+					vertexPosition: this.gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+					vertexColor: this.gl.getAttribLocation(shaderProgram, "aVertexColor")
 				},
 				uniformLocations: {
-					MVPMatrix: this.gl.getUniformLocation(shaderProgram, 'uMVPMatrix')
+					MVPMatrix: this.gl.getUniformLocation(shaderProgram, "uMVPMatrix")
 				}
 			};
 		}
@@ -471,9 +472,9 @@ var Renderer = function() {
 		this.gl.enableVertexAttribArray(this.axisProgramInfo.attribLocations.vertexColor);
 		// Dessin
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-		this.gl.lineWidth(8)
+		this.gl.lineWidth(8);
 		this.gl.drawArrays(this.gl.LINES, 0, 18);
-	}
+	};
 	
 	Renderer.prototype.drawText = function(text, font, x, y, size=10, color=[1,1,1,1], hAlign="center", vAlign="center") {
 	    if (!font) return console.error("undefined font");
@@ -505,12 +506,12 @@ var Renderer = function() {
 			this.textProgramInfo = {
 				program: shaderProgram,
 				attribLocations: {
-					vertexPosition: this.gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+					vertexPosition: this.gl.getAttribLocation(shaderProgram, "aVertexPosition"),
 				},
 				uniformLocations: {
-					textColor: this.gl.getUniformLocation(shaderProgram, 'uTextColor'),
-					atlas: this.gl.getUniformLocation(shaderProgram, 'uAtlas'),
-					aspectRatio: this.gl.getUniformLocation(shaderProgram, 'uAspectRatio')
+					textColor: this.gl.getUniformLocation(shaderProgram, "uTextColor"),
+					atlas: this.gl.getUniformLocation(shaderProgram, "uAtlas"),
+					aspectRatio: this.gl.getUniformLocation(shaderProgram, "uAspectRatio")
 				}
 			};
 		}
@@ -529,7 +530,7 @@ var Renderer = function() {
                 this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 1);
                 this.gl.pixelStorei(this.gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, this.gl.NONE);
                 this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, atlasImage);
-            }
+            };
             atlasImage.src = "fonts/"+font.name+".png";
             this.fonts[font.name] = atlas;
 		}
@@ -579,7 +580,7 @@ var Renderer = function() {
 		// Dessin
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertices.length/4);
-	}
+	};
 	
 	Renderer.prototype.drawInterfaceQuad = function(x, y, width, height, color) {
 		// Initialisation du programme 
@@ -606,11 +607,11 @@ var Renderer = function() {
 			this.interfaceProgramInfo = {
 				program: shaderProgram,
 				attribLocations: {
-					vertexPosition: this.gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-					vertexColor: this.gl.getAttribLocation(shaderProgram, 'aVertexColor')
+					vertexPosition: this.gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+					vertexColor: this.gl.getAttribLocation(shaderProgram, "aVertexColor")
 				},
 				uniformLocations: {
-				    aspectRatio: this.gl.getUniformLocation(shaderProgram, 'uAspectRatio')
+				    aspectRatio: this.gl.getUniformLocation(shaderProgram, "uAspectRatio")
 				}
 			};
 		}
@@ -641,7 +642,7 @@ var Renderer = function() {
 		this.gl.depthFunc(this.gl.ALWAYS);
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertices.length/2);
-	}
+	};
 	
 	Renderer.prototype.drawModel = function(model, x, y, size=1, rotation=[0,0,0], deltaTime=0) {
 	    var allColors = [];
@@ -671,20 +672,20 @@ var Renderer = function() {
 			orients: allOrients,
 			scales: allScales
 		}, projectionMatrix, mat4.create(), 0);
-	}
+	};
 	
 	return Renderer;
-}();
+})();
 
 // public
-var Camera = function() {
+var Camera = (function() {
 	var Camera = function(position, targetPos=[0,0,0], rot=[0,0,0]) {
 		this.target = targetPos.slice(0,3);
 		this.rot = rot.slice(0,3);
 		this.prevRot = rot.slice(0,3);
 		this.position = position.slice(0,3); // par rapport à target
 		this.prevPosition = position.slice(0,3);
-	}
+	};
 	
 	Camera.prototype.getViewMatrix = function(tickProgress=1) {
 		var vMatrix = mat4.create();
@@ -695,11 +696,11 @@ var Camera = function() {
 		mat4.rotate(vMatrix, vMatrix, rot[2], [0, 0, 1]);
 		mat4.translate(vMatrix, vMatrix, [-this.target[0], -this.target[1], -this.target[2]]);
 		return vMatrix;
-	}
+	};
 	
 	Camera.prototype.setTargetPos = function(targetPos) {
 		this.target = targetPos;
-	}
+	};
 	
 	Camera.prototype.update = function() {
 	    this.prevRot[0] = this.rot[0];
@@ -716,7 +717,7 @@ var Camera = function() {
 			tickProgress*this.rot[1]+(1-tickProgress)*(this.prevRot[1]+(this.rot[1]-this.prevRot[1]>Math.PI?2*Math.PI:this.rot[1]-this.prevRot[1]<-Math.PI?-2*Math.PI:0)),
 			tickProgress*this.rot[2]+(1-tickProgress)*(this.prevRot[2]+(this.rot[2]-this.prevRot[2]>Math.PI?2*Math.PI:this.rot[2]-this.prevRot[2]<-Math.PI?-2*Math.PI:0))
 		];
-	}
+	};
 	
 	Camera.prototype.setRot = function(rot, tp=false) {
 		if (tp) {
@@ -727,7 +728,7 @@ var Camera = function() {
 		this.rot[0] = rot[0]%(2*Math.PI);
 		this.rot[1] = rot[1]%(2*Math.PI);
 		this.rot[2] = rot[2]%(2*Math.PI);
-	}
+	};
 	
 	Camera.prototype.getPosition = function(tickProgress=1) {
 		return [
@@ -735,23 +736,23 @@ var Camera = function() {
 		    tickProgress*this.position[1]+(1-tickProgress)*this.prevPosition[1],
 		    tickProgress*this.position[2]+(1-tickProgress)*this.prevPosition[2]
 	    ];
-	}
+	};
 	
 	Camera.prototype.setDistance = function(distance, tp=false) {
 		if (tp) {
 			this.prevPosition[2] = distance;
 		}
 		this.position[2] = distance;
-	}
+	};
 	
 	return Camera;
-}();
+})();
 
 /*
  * Easing Functions - inspired from http://gizma.com/easing/
  * only considering the t value for the range [0, 1] => [0, 1]
  */
-EasingFunctions = {
+var EasingFunctions = {
 	// no easing, no acceleration
 	linear: t => t,
 	// accelerating from zero velocity
@@ -797,21 +798,20 @@ EasingFunctions = {
     	easeInOutQuint: "Attenuation quintessentielle",
     	instantaneous: "Instanée"
 	}
-}
+};
 
 // public static
 function loadJSONFile(url) {
-    var promise = new (Promise||ES6Promise)(function(resolve, reject) {
+    return new (Promise||ES6Promise)(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url);
         xhr.onreadystatechange = function() {
             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                 resolve(JSON.parse(this.response));
             }
-        }
+        };
         xhr.send();
     });
-    return promise;
 }
 
 // public static
@@ -825,7 +825,7 @@ function loadFontFromAssets(name) {
 }
 
 // public extends ContainerComponent
-var InterfaceDiv = function() {
+var InterfaceDiv = (function() {
     var InterfaceDiv = function(color=[.6,.6,.6,.8], transient=undefined) {
         this.color = color;
         this.components = [];
@@ -833,7 +833,7 @@ var InterfaceDiv = function() {
         this.selectedComponent = transient||0;
         this.focus = false;
         this.transient = transient!==undefined;
-    }
+    };
     
     InterfaceDiv.prototype.add = function(component) {
         this.components.push(component);
@@ -844,42 +844,42 @@ var InterfaceDiv = function() {
         this.focus = visible;
         if (this.transient && this.focus)
             this.click();
-    }
+    };
     
     InterfaceDiv.prototype.toggleVisible = function() {
         this.visible = !this.visible;
         this.focus = this.visible;
         if (this.transient && this.focus)
             this.click();
-    }
+    };
     
     InterfaceDiv.prototype.isVisible = function() {
         return this.visible;
-    }
+    };
     
     InterfaceDiv.prototype.next = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].next();
         if (++this.selectedComponent >= this.components.length)
             this.selectedComponent = 0;
-    }
+    };
     
     InterfaceDiv.prototype.previous = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].previous();
         if (--this.selectedComponent < 0)
             this.selectedComponent = this.components.length-1;
-    }
+    };
     
     InterfaceDiv.prototype.nextRow = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].nextRow();
-    }
+    };
     
     InterfaceDiv.prototype.previousRow = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].previousRow();
-    }
+    };
     
     InterfaceDiv.prototype.draw = function(renderer, x, y, width) {
         var height = this.getHeight();
@@ -898,14 +898,14 @@ var InterfaceDiv = function() {
 		    y += -component.getHeight() - 0.01;
 		    i++;
 		}
-    }
+    };
     
     InterfaceDiv.prototype.getHeight = function() {
         var height = 0.05;
         for (let component of this.components)
             height += component.getHeight() + 0.01;
         return height+0.04;
-    }
+    };
     
     InterfaceDiv.prototype.click = function(button=0) {
         if (this.selectedComponent<this.components.length) {
@@ -932,7 +932,7 @@ var InterfaceDiv = function() {
     };
     
     return InterfaceDiv;
-}();
+})();
 
 /*// public
 var Component = function() {
@@ -946,7 +946,7 @@ var Component = function() {
 }();*/
 
 // public extends Component
-var InterfaceText = function() {
+var InterfaceText = (function() {
     var InterfaceText = function(text, font, size=0.1, color=[1,1,1,1]) {
         this.text = text;
         this.font = font;
@@ -960,17 +960,17 @@ var InterfaceText = function() {
     
     InterfaceText.prototype.draw = function(renderer, x, y, width) {
         renderer.drawText(this.text, this.font, x, y+0.1*this.size, this.size*0.8, this.color, "center", "center");
-    }
+    };
     
     InterfaceText.prototype.getHeight = function() {
         return this.size;
-    }
+    };
     
     return InterfaceText;
-}();
+})();
 
 // public extends Component
-var InterfaceButton = function() {
+var InterfaceButton = (function() {
     var InterfaceButton = function(text, font, height=0.1, color=[1,0,0,1], textColor=[1,1,1,1]) {
         this.text = text;
         this.font = font;
@@ -992,17 +992,17 @@ var InterfaceButton = function() {
     InterfaceButton.prototype.draw = function(renderer, x, y, width) {
         renderer.drawInterfaceQuad(x, y, width, this.height, this.color);
         renderer.drawText(this.text, this.font, x, y+0.1*this.height, this.height*0.8, this.textColor, "center", "center");
-    }
+    };
     
     InterfaceButton.prototype.getHeight = function() {
         return this.height;
-    }
+    };
     
     return InterfaceButton;
-}();
+})();
 
 // public extends ContainerComponent
-var InterfaceGrid = function() {
+var InterfaceGrid = (function() {
     var InterfaceGrid = function(componentsByLine, color=[.6,.6,.6,.8]) {
         this.componentsByLine = componentsByLine;
         this.color = color;
@@ -1010,7 +1010,7 @@ var InterfaceGrid = function() {
         this.visible = false;
         this.selectedComponent = 0;
         this.focus = false;
-    }
+    };
     
     InterfaceGrid.prototype.add = function(component) {
         this.components.push(component);
@@ -1018,15 +1018,15 @@ var InterfaceGrid = function() {
     
     InterfaceGrid.prototype.setVisible = function(visible=true) {
         this.visible = visible;
-    }
+    };
     
     InterfaceGrid.prototype.toggleVisible = function() {
         this.visible = !this.visible;
-    }
+    };
     
     InterfaceGrid.prototype.isVisible = function() {
         return this.visible;
-    }
+    };
     
     InterfaceGrid.prototype.next = function() {
         if (!this.focus)
@@ -1034,7 +1034,7 @@ var InterfaceGrid = function() {
         this.selectedComponent += this.componentsByLine;
         if (this.selectedComponent >= this.components.length)
             this.selectedComponent %= this.componentsByLine;
-    }
+    };
     
     InterfaceGrid.prototype.previous = function() {
         if (!this.focus)
@@ -1045,21 +1045,21 @@ var InterfaceGrid = function() {
             if (this.selectedComponent>=this.components.length)
                 this.selectedComponent -= this.componentsByLine;
         }
-    }
+    };
     
     InterfaceGrid.prototype.nextRow = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].next();
         if (++this.selectedComponent >= this.components.length)
             this.selectedComponent = 0;
-    }
+    };
     
     InterfaceGrid.prototype.previousRow = function() {
         if (!this.focus)
             return this.components[this.selectedComponent].previous();
         if (--this.selectedComponent < 0)
             this.selectedComponent = this.components.length-1;
-    }
+    };
     
     InterfaceGrid.prototype.draw = function(renderer, X, Y, Width) {
         var Height = this.getHeight();
@@ -1087,7 +1087,7 @@ var InterfaceGrid = function() {
 		        x += width + 0.01;
 		    }
 		}
-    }
+    };
     
     InterfaceGrid.prototype.getHeight = function() {
         var height = 0.05;
@@ -1099,7 +1099,7 @@ var InterfaceGrid = function() {
             height += lineHeight + 0.01;
         }
         return height+0.04;
-    }
+    };
     
     InterfaceGrid.prototype.click = function(button=0) {
         if (this.selectedComponent<this.components.length) {
@@ -1124,10 +1124,10 @@ var InterfaceGrid = function() {
     };
     
     return InterfaceGrid;
-}();
+})();
 
 // public extends Component
-var InterfaceModelView = function() {
+var InterfaceModelView = (function() {
     var InterfaceModelView = function(model, font, size=0.1, color=[1,1,1,0.1], textColor=[1,1,1,1]) {
         this.model = model;
         this.font = font;
@@ -1151,11 +1151,11 @@ var InterfaceModelView = function() {
         if (this.model)
             renderer.drawModel(this.model, x, y, width*0.5, [Math.PI/4, Math.PI/5, Math.PI/6], 0);
         //renderer.drawText(this.text, this.font, x, y+0.1*this.height, this.height*0.8, this.textColor, "center", "center");
-    }
+    };
     
     InterfaceModelView.prototype.getHeight = function() {
         return this.size;
-    }
+    };
     
     return InterfaceModelView;
-}();
+})();

@@ -1,4 +1,5 @@
-var InputsManager = function() {
+"use strict";
+var InputsManager = (function() {
     // keys : paires de touches (MouseButton1, KeyE, Space, GamepadButton5 etc. ; GamepadAxe1, MouseMoveX etc.) et d'entrée (jump, grab etc. ; ou +moveX, -moveX etc. pour les axes en 2 boutons)
     var InputsManager = function(keys, htmlElement=document) {
         this.keys = keys;
@@ -101,7 +102,7 @@ var InputsManager = function() {
     };
     
     return InputsManager;
-}();
+})();
 
 // private
 var sign = function(x) {

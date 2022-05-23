@@ -1,4 +1,5 @@
-var World = function() {
+"use strict";
+var World = (function() {
     var World = function(tps, items=[]) {
         this.tps = tps;
         this.previousTick = Date.now();
@@ -111,9 +112,9 @@ var World = function() {
     };
     
     return World;
-}();
+})();
 
-var Entity = function() {
+var Entity = (function() {
 	var Entity = function(world, modelName, pos, animName=undefined, scale=1, rot=[0,0,0]) {
 		this.world = world;
 		this.modelName = modelName;
@@ -186,9 +187,9 @@ var Entity = function() {
 	};
 	
 	return Entity;
-}();
+})();
 
-var Alive = function Alive() {
+var Alive = (function Alive() {
 	var Alive = function(world, modelName, pos, animName, speed=2, scale=1, rot=[0,0,0]) {
 		Entity.call(this, world, modelName, pos, animName, scale, rot);
 		this.speed = speed;
@@ -199,9 +200,9 @@ var Alive = function Alive() {
 	Alive.prototype.constructor = Alive;
 	
 	return Alive;
-}();
+})();
 
-var FlyingEntity = function FlyingEntity() {
+var FlyingEntity = (function FlyingEntity() {
 	var FlyingEntity = function(world, modelName, pos, animName, scale=1, speed=2, limits={}) {
 		Entity.call(this, world, modelName, pos, animName, scale, [0,0,0]);
 		this.speed = speed;
@@ -252,9 +253,9 @@ var FlyingEntity = function FlyingEntity() {
 	};
 	
 	return FlyingEntity;
-}();
+})();
 
-var DriftingEntity = function() {
+var DriftingEntity = (function() {
 	var DriftingEntity = function(world, itemId, pos, animName, scale=1, limits={}) {
 		Entity.call(this, world, itemId, pos, animName, scale, [0,0,0]);
 		this.itemId = itemId;
@@ -282,16 +283,16 @@ var DriftingEntity = function() {
 	};
 	
 	return DriftingEntity;
-}();
+})();
 
-var Item = function() {
+var Item = (function() {
     var Item = function(id, driftingProba=0) {
         this.id = id;
         this.driftingProba = driftingProba;
     };
     
     return Item;
-}();
+})();
 
 // static
 function mod(a,b,around0=false) {
@@ -300,7 +301,7 @@ function mod(a,b,around0=false) {
     return (a%b+b)%b;
 }
 
-var Inventory = function() {
+var Inventory = (function() {
     var Inventory = function(size=16, stackSize=16) {
         this.items = [];
         this.size = size;
@@ -366,4 +367,4 @@ var Inventory = function() {
     };
     
     return Inventory;
-}();
+})();
