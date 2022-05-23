@@ -1,3 +1,4 @@
+"use strict";
 var model = {voxels:[{pos:[0,0,0],scale:[1,1,1],color:[1,1,1,1],name:"voxel",rotation:[0,0,0],origin:[0,0,0]}]};
 var editingVoxelIndex = [0];
 var editingAnimName = "";
@@ -26,7 +27,7 @@ function refreshHierarchy(model) {
                 i++;
             }
         div.appendChild(childrenDiv);
-    }
+    };
     var hierarchyDiv = document.getElementById("hierarchy");
     hierarchyDiv.innerHTML = "";
     f(hierarchyDiv, model);
@@ -80,7 +81,7 @@ function decrement(input, value=1) {
 function hexToColor(hex) {
     if (!hex)
         return undefined;
-    return [Math.floor(new Number("0x"+hex.slice(1,3))/255*1000)/1000, Math.floor(new Number("0x"+hex.slice(3,5))/255*1000)/1000, Math.floor(new Number("0x"+hex.slice(5,7))/255*1000)/1000, 1];
+    return [Math.floor(Number("0x"+hex.slice(1,3))/255*1000)/1000, Math.floor(new Number("0x"+hex.slice(3,5))/255*1000)/1000, Math.floor(new Number("0x"+hex.slice(5,7))/255*1000)/1000, 1];
 }
 function refreshVoxel() {
     let voxel = getVoxel(editingVoxelIndex);
@@ -151,7 +152,7 @@ function addChildVoxel() {
 function copyVoxel() {
     let parentVoxel = getVoxel(editingVoxelIndex.slice(0, editingVoxelIndex.length-1));
     let copy = JSON.parse(JSON.stringify(getVoxel(editingVoxelIndex)));
-    copy.name += " (copie)"
+    copy.name += " (copie)";
     parentVoxel.voxels.push(copy);
     editingVoxelIndex[editingVoxelIndex.length-1] = parentVoxel.voxels.length-1;
     refreshEditor();
@@ -170,7 +171,7 @@ function getAnimsNames(model) {
 			        animsNames.push(subAnimName);
 	if (model.voxels)
     	for (let voxel of model.voxels)
-    		for (animName of getAnimsNames(voxel))
+    		for (let animName of getAnimsNames(voxel))
     			if (!animsNames.includes(animName))
     			    animsNames.push(animName);
 	return animsNames;
@@ -247,7 +248,7 @@ function refreshKeyframesEditor() {
         }
     } else {
         document.getElementById("anim-duration").value = "";
-        movesDiv.innerText = "Aucune valeur clé, animez sur cette propriété en en rajoutant une."
+        movesDiv.innerText = "Aucune valeur clé, animez sur cette propriété en en rajoutant une.";
     }
 }
 function addAnim() {
@@ -273,7 +274,7 @@ function deleteAnim() {
     if (editingAnimName=="")
         return alert("Il n'y a aucune animation à supprimer");
     let voxel = getVoxel(editingVoxelIndex);
-    delete voxel.anims[editingAnimName]
+    delete voxel.anims[editingAnimName];
     editingAnimName = "";
     refreshAnimsSelector();
 }
@@ -300,7 +301,7 @@ function deleteKeyframe(index) {
         delete anim[editingAnimMoveProp];
     refreshKeyframesEditor();
 }
-async function pickColor(defaultColor=undefined) {
+function pickColor(defaultColor=undefined) {
 	var promise = new Promise(function(resolve,reject){
 		var popup;
 		document.body.appendChild(popup = createElement("div", {className:"popup-container"}, [

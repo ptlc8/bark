@@ -1,4 +1,5 @@
-var game = async function() {
+"use strict";
+var game = (async function() {
     // Affichage
     var cvs = document.getElementById("aff");
     /*var*/ renderer = new Renderer(cvs, true);
@@ -158,18 +159,18 @@ var game = async function() {
     function refreshInventoryInterface() {
         interfaces.inventory.components[1].components = [];
         for (let item of inventory)
-            interfaces.inventory.components[1].add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1))
+            interfaces.inventory.components[1].add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
     }
     
     // fonction de rendu
 	var last = 0;
-	var fps = undefined;
+	var fps;
 	var frames = 0;
 	function render(now) {
 	    while (world.previousTick+1000/world.tps <= Date.now())
 			update(1/world.tps);
 		if (now-(now%1000) > last-(last%1000)) {
-		    fps = frames
+		    fps = frames;
 		    frames = 0;
 		    document.title = fps+" FPS";
 		}
@@ -187,9 +188,9 @@ var game = async function() {
 		requestAnimationFrame(render);
 	}
 	requestAnimationFrame(render);
-}();
+})();
 
-var Random = function() {
+var Random = (function() {
     var Random = function(seed=1) {
         this.seed = 1;
     };
@@ -197,7 +198,7 @@ var Random = function() {
     Random.prototype.next = function() {
     	var x = Math.sin(this.seed++) * 10000;
     	return x - Math.floor(x);
-    }
+    };
     
     return Random;
-}();
+}());
