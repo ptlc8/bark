@@ -95,16 +95,20 @@ var game = (async function() {
                 interfaceRoot.previous();
             if (inputs.directionZ.value>0 && inputs.directionZ.clicked)
                 interfaceRoot.next();
-            if (inputs.jump.clicked)
+            if (inputs.jump.clicked) {
+                InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.click();
+            }
             if (inputs.action.clicked)
                 interfaceRoot.back();
             if (inputs.directionX.value<0 && inputs.directionX.clicked)
                 interfaceRoot.previousCol();
             if (inputs.directionX.value>0 && inputs.directionX.clicked)
                 interfaceRoot.nextCol();
-            if (inputs.menu.clicked)
+            if (inputs.menu.clicked) {
+                InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.close();
+            }
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
             camera.rot[1] += inputs.cameraRotateY.value*delta*4;
@@ -114,7 +118,7 @@ var game = (async function() {
             if (inputs.zoomin.pressed) // zoom
                 camera.setDistance(Math.min(-5, camera.position[2]+1));
             if (inputs.action.clicked) { // action
-                vibrate(80, 1, 0.5);
+                InputsManager.vibrate(80, 1, 0.5);
                 console.log("ACTION");
                 for (let entity of world.entities) {
                     if (entity instanceof DriftingEntity && Math.sqrt(Math.pow(entity.pos[0]-player.pos[0],2)+Math.pow(entity.pos[1]-player.pos[1],2)+Math.pow(entity.pos[2]-player.pos[2],2)) < 1) {
@@ -125,15 +129,15 @@ var game = (async function() {
                 }
             }
             if (inputs.menu.clicked) { // menu
-                vibrate(80, 1, 0.5);
+                InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.open("menu");
             }
             if (inputs.inventory.clicked) { // inventaire
-                vibrate(80, 1, 0.5);
+                InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.open("inventory");
             }
             if (inputs.jump.clicked) { // saut
-                vibrate(80, 1, 0.5);
+                InputsManager.vibrate(80, 1, 0.5);
                 var groundY = world.getGround(...player.pos);
                 if (groundY && groundY==player.pos[1])
                     player.pos[1]++;
@@ -167,16 +171,6 @@ var game = (async function() {
     	} else if (groundHeight>player.pos[1]) {
     	    player.pos[1] = groundHeight;
     	}
-    }
-    
-    function vibrate(duration=200, strongMagnitude=1.0, weakMagnitude=1.0) {
-        var gamepad = (navigator.getGamepads?navigator.getGamepads():[])[0];
-        if (gamepad) {
-            if (gamepad.vibrationActuator)
-                gamepad.vibrationActuator.playEffect("dual-rumble", {duration,strongMagnitude,weakMagnitude});
-            if (gamepad.hapticActuators)
-                gamepad.hapticActuators[0].pulse(strongMagnitude, duration);
-        }
     }
     
     // fonction de rendu

@@ -102,6 +102,18 @@ var InputsManager = (function() {
             return inputsToSend;
         }
     }
+
+    // static
+    var vibrate = function(duration=200, strongMagnitude=1.0, weakMagnitude=1.0) {
+        var gamepad = (navigator.getGamepads?navigator.getGamepads():[])[0];
+        if (gamepad) {
+            if (gamepad.vibrationActuator)
+                gamepad.vibrationActuator.playEffect("dual-rumble", {duration,strongMagnitude,weakMagnitude});
+            if (gamepad.hapticActuators)
+                gamepad.hapticActuators[0].pulse(strongMagnitude, duration);
+        }
+    };
+    InputsManager.vibrate = vibrate;
     
     return InputsManager;
 })();
