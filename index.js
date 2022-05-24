@@ -39,7 +39,22 @@ var game = (async function() {
     var inventory = new Inventory(24,16);
     inventory.add("boards", 4);
     // Gestion des inputs
-    var keys = [["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],["GamepadAxe1","directionZ"], ["KeyC","action"],["GamepadButton0","action"], ["Escape","menu"],["GamepadButton16","menu"], ["GamepadButton8","zoomout"],["Minus","zoomout"], ["GamepadButton9","zoomin"],["Equal","zoomin"], ["GamepadButton3","inventory"],["KeyE","inventory"], ["Space","jump"],["GamepadButton2","jump"], ["GamepadAxe2","cameraRotateY"],["GamepadAxe3","cameraRotateX"],["MouseGrabMoveX","cameraRotateY"],["MouseGrabMoveY","cameraRotateX"],["MouseButton0","click"], ["GamepadButton6","run"],["ShiftLeft","run"]];
+    var keys = [
+        ["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["GamepadAxe1","directionZ"],
+        ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],
+        ["GamepadAxe2","cameraRotateY"],["MouseGrabMoveX","cameraRotateY"],
+        ["GamepadAxe3","cameraRotateX"],["MouseGrabMoveY","cameraRotateX"],
+        ["GamepadButton1","action"],["KeyC","action"],
+        ["GamepadButton2","inventory"],["KeyE","inventory"],
+        ["GamepadButton3","craft"],["KeyR","craft"],
+        ["GamepadButton3","special"],["KeyA","special"],
+        ["GamepadButton6","run"],["ShiftLeft","run"],
+        ["GamepadButton7","jump"],["Space","jump"],
+        ["GamepadButton8","zoomout"],["Minus","zoomout"],
+        ["GamepadButton9","zoomin"],["Equal","zoomin"],
+        ["GamepadButton16","menu"],["Escape","menu"],
+        ["MouseButton0","click"],
+    ];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
     var interfaceRoot = new InterfaceRoot();
@@ -52,7 +67,7 @@ var game = (async function() {
         var fsButton = new InterfaceButton("Plein écran", fonts.Arial, 0.1, [0.5,0.7,1,1]);
         fsButton.setOnClick(function() {
             if (document.fullscreenElement)
-                document.exitFullScreen();
+                document.exitFullscreen();
             else cvs.requestFullscreen();
         });
         menu.add(fsButton);
@@ -95,11 +110,11 @@ var game = (async function() {
                 interfaceRoot.previous();
             if (inputs.directionZ.value>0 && inputs.directionZ.clicked)
                 interfaceRoot.next();
-            if (inputs.jump.clicked) {
+            if (inputs.action.clicked) {
                 InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.click();
             }
-            if (inputs.action.clicked)
+            if (inputs.special.clicked)
                 interfaceRoot.back();
             if (inputs.directionX.value<0 && inputs.directionX.clicked)
                 interfaceRoot.previousCol();
