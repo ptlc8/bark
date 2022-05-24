@@ -37,27 +37,51 @@ var game = (async function() {
     world.entities.push(sun);
     world.entities.push(new Entity(world, "sea", [0,0,0]));
     var inventory = new Inventory(24,16);
+    inventory.add("boards", 4);
     // Gestion des inputs
     var keys = [["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],["GamepadAxe1","directionZ"], ["KeyC","action"],["GamepadButton0","action"], ["Escape","menu"],["GamepadButton16","menu"], ["GamepadButton8","zoomout"],["Minus","zoomout"], ["GamepadButton9","zoomin"],["Equal","zoomin"], ["GamepadButton3","inventory"],["KeyE","inventory"], ["Space","jump"],["GamepadButton2","jump"], ["GamepadAxe2","cameraRotateY"],["GamepadAxe3","cameraRotateX"],["MouseGrabMoveX","cameraRotateY"],["MouseGrabMoveY","cameraRotateX"],["MouseButton0","click"], ["GamepadButton6","run"],["ShiftLeft","run"]];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
-    var interfaces = {};
+    var interfaceRoot = new InterfaceRoot();
+    window.interfaceRoot = interfaceRoot;
     {
-        interfaces.menu = new InterfaceDiv();
-        interfaces.menu.add(new InterfaceText("Menu", fonts.Arial, 0.15));
+        // Menu principal
+        var menu = new InterfaceDiv();
+        menu.setVisible(false);
+        menu.add(new InterfaceText("Menu", fonts.Arial, 0.15));
         var fsButton = new InterfaceButton("Plein écran", fonts.Arial, 0.1, [0.5,0.7,1,1]);
-        fsButton.setOnClick(()=>cvs.requestFullscreen());
-        interfaces.menu.add(fsButton);
-        interfaces.menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
-        interfaces.menu.add(new InterfaceButton("B", fonts.Arial, 0.1, [0.2,1,0.2,1]));
-        interfaces.menu.add(new InterfaceButton("C", fonts.Arial, 0.1, [0.2,0.2,1,1]));
-        interfaces.inventory = new InterfaceDiv(undefined, 1);
+        fsButton.setOnClick(function() {
+            if (document.fullscreenElement)
+                document.exitFullScreen();
+            else cvs.requestFullscreen();
+        });
+        menu.add(fsButton);
+        menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
+        var bButton = new InterfaceButton("B", fonts.Arial, 0.1, [0.2,1,0.2,1]);
+        bButton.setOnClick(()=>interfaceRoot.open("crafting"));
+        menu.add(bButton);
+        menu.add(new InterfaceButton("C", fonts.Arial, 0.1, [0.2,0.2,1,1]));
+        interfaceRoot.register("menu", menu);
+        // Inventaire
+        var inventoryDiv = new InterfaceDiv(undefined, 1);
+        inventoryDiv.setVisible(false);
         var inv = new InterfaceGrid(8);
-        interfaces.inventory.add(new InterfaceText("Inventaire", fonts.Arial, 0.15));
-        interfaces.inventory.add(inv);
-        /*for (let l of "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            inv.add(new InterfaceButton(l, fonts.Arial, 0.1, [1,0.2,0.2,1]));*/
-        interfaces.inventory.add(new InterfaceText("LStick/ZQSD : Déplacer   Y/Space : Selectionner   B/C : Retour", fonts.Arial, 0.05));
+        inventoryDiv.add(new InterfaceText("Inventaire", fonts.Arial, 0.15));
+        inventoryDiv.add(inv);
+        inventoryDiv.add(new InterfaceText("LStick/ZQSD : Déplacer   Y/Space : Selectionner   B/C : Retour", fonts.Arial, 0.05));
+        interfaceRoot.register("inventory", inventoryDiv);
+        inventoryDiv.setOnRefresh(function() {
+            inv.components = [];
+            for (let item of inventory)
+            inv.add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
+        });
+        // Crafting
+        var crafting = new InterfaceGrid(2);
+        crafting.setVisible(false);
+        crafting.add(new InterfaceModelView());
+        var craftingsDiv = new InterfaceDiv();
+        crafting.add(craftingsDiv);
+        interfaceRoot.register("crafting", crafting);
     }
     
     // Fonction d'avancement du jeu
@@ -66,21 +90,21 @@ var game = (async function() {
         camera.update();
         var inputs = inputsManager.getInputs();
         sun.setPos(world.getSunPos());
-        var visibleInterface = Object.values(interfaces).find(itf=>itf.isVisible());
-        if (visibleInterface)  {
+        if (interfaceRoot.isFocus())  {
             if (inputs.directionZ.value<0 && inputs.directionZ.clicked)
-                visibleInterface.previous();
+                interfaceRoot.previous();
             if (inputs.directionZ.value>0 && inputs.directionZ.clicked)
-                visibleInterface.next();
+                interfaceRoot.next();
             if (inputs.jump.clicked)
-                visibleInterface.click();
+                interfaceRoot.click();
             if (inputs.action.clicked)
-                if (visibleInterface.back())
-                    visibleInterface.setVisible(false);
+                interfaceRoot.back();
             if (inputs.directionX.value<0 && inputs.directionX.clicked)
-                visibleInterface.previousRow();
+                interfaceRoot.previousCol();
             if (inputs.directionX.value>0 && inputs.directionX.clicked)
-                visibleInterface.nextRow();
+                interfaceRoot.nextCol();
+            if (inputs.menu.clicked)
+                interfaceRoot.close();
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
             camera.rot[1] += inputs.cameraRotateY.value*delta*4;
@@ -102,13 +126,11 @@ var game = (async function() {
             }
             if (inputs.menu.clicked) { // menu
                 vibrate(80, 1, 0.5);
-                if (interfaces.inventory.isVisible()) interfaces.inventory.setVisible(false);
-                else interfaces.menu.toggleVisible();
+                interfaceRoot.open("menu");
             }
             if (inputs.inventory.clicked) { // inventaire
                 vibrate(80, 1, 0.5);
-                refreshInventoryInterface();
-                interfaces.inventory.toggleVisible();
+                interfaceRoot.open("inventory");
             }
             if (inputs.jump.clicked) { // saut
                 vibrate(80, 1, 0.5);
@@ -157,12 +179,6 @@ var game = (async function() {
         }
     }
     
-    function refreshInventoryInterface() {
-        interfaces.inventory.components[1].components = [];
-        for (let item of inventory)
-            interfaces.inventory.components[1].add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
-    }
-    
     // fonction de rendu
 	var last = 0;
 	var fps;
@@ -180,9 +196,7 @@ var game = (async function() {
 		last = now;
 		camera.setTargetPos(player.getPos());
 		renderer.drawWorld(world, models, camera, deltaTime);
-		for (const [name,interfacee] of Object.entries(interfaces))
-		    if (interfacee.isVisible())
-		        interfacee.draw(renderer, 0, 0, 1);
+        interfaceRoot.draw(renderer, 0, 0, 1);
 		renderer.drawText(player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
 		renderer.drawText(fps+" fps", fonts.Arial, -1, 0.95, .05, [1,1,1,1], "left", "top");
 		

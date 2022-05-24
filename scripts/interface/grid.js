@@ -1,26 +1,11 @@
 "use strict";
-// public extends ContainerComponent
+// public
 var InterfaceGrid = (function() {
-    class InterfaceGrid {
-		constructor(componentsByLine, color = [.6, .6, .6, .8]) {
+    class InterfaceGrid extends InterfaceParent {
+		constructor(componentsByLine, transient=undefined, color = [.6, .6, .6, .8]) {
+			super(transient);
 			this.componentsByLine = componentsByLine;
 			this.color = color;
-			this.components = [];
-			this.visible = false;
-			this.selectedComponent = 0;
-			this.focus = false;
-		}
-		add(component) {
-			this.components.push(component);
-		}
-		setVisible(visible = true) {
-			this.visible = visible;
-		}
-		toggleVisible() {
-			this.visible = !this.visible;
-		}
-		isVisible() {
-			return this.visible;
 		}
 		next() {
 			if (!this.focus)
@@ -39,16 +24,16 @@ var InterfaceGrid = (function() {
 					this.selectedComponent -= this.componentsByLine;
 			}
 		}
-		nextRow() {
+		nextCol() {
 			if (!this.focus)
-				return this.components[this.selectedComponent].next();
-			if (++this.selectedComponent >= this.components.length)
+				return this.components[this.selectedComponent].nextCol();
+			else if (++this.selectedComponent >= this.components.length)
 				this.selectedComponent = 0;
 		}
-		previousRow() {
+		previousCol() {
 			if (!this.focus)
-				return this.components[this.selectedComponent].previous();
-			if (--this.selectedComponent < 0)
+				return this.components[this.selectedComponent].previousCol();
+			else if (--this.selectedComponent < 0)
 				this.selectedComponent = this.components.length - 1;
 		}
 		draw(renderer, X, Y, Width) {
@@ -91,9 +76,9 @@ var InterfaceGrid = (function() {
 		}
 		click(button = 0) {
 			if (this.selectedComponent < this.components.length) {
-				if (this.focus && (this.components[this.selectedComponent] instanceof InterfaceDiv || this.components[this.selectedComponent] instanceof InterfaceGrid)) {
+				if (this.focus && (this.components[this.selectedComponent] instanceof InterfaceParent)) {
 					this.focus = false;
-					this.components[this.selectedComponent].focus = true;
+					this.components[this.selectedComponent].setFocus(true);
 				} else {
 					this.components[this.selectedComponent].click(button);
 				}

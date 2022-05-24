@@ -1,32 +1,13 @@
 "use strict";
-// public extends ContainerComponent
+// public
 var InterfaceDiv = (function() {
-    class InterfaceDiv {
+    class InterfaceDiv extends InterfaceParent {
 		constructor(color = [0.6, 0.6, 0.6, 0.8], transient = undefined) {
+			super(transient);
 			this.color = color;
-			this.components = [];
-			this.visible = false;
-			this.selectedComponent = transient || 0;
-			this.focus = false;
-			this.transient = transient !== undefined;
 		}
 		add(component) {
 			this.components.push(component);
-		}
-		setVisible(visible = true) {
-			this.visible = visible;
-			this.focus = visible;
-			if (this.transient && this.focus)
-				this.click();
-		}
-		toggleVisible() {
-			this.visible = !this.visible;
-			this.focus = this.visible;
-			if (this.transient && this.focus)
-				this.click();
-		}
-		isVisible() {
-			return this.visible;
 		}
 		next() {
 			if (!this.focus)
@@ -40,13 +21,13 @@ var InterfaceDiv = (function() {
 			if (--this.selectedComponent < 0)
 				this.selectedComponent = this.components.length - 1;
 		}
-		nextRow() {
+		nextCol() {
 			if (!this.focus)
-				return this.components[this.selectedComponent].nextRow();
+				return this.components[this.selectedComponent].nextCol();
 		}
-		previousRow() {
+		previousCol() {
 			if (!this.focus)
-				return this.components[this.selectedComponent].previousRow();
+				return this.components[this.selectedComponent].previousCol();
 		}
 		draw(renderer, x, y, width) {
 			var height = this.getHeight();
@@ -74,7 +55,7 @@ var InterfaceDiv = (function() {
 		}
 		click(button = 0) {
 			if (this.selectedComponent < this.components.length) {
-				if (this.focus && this.components[this.selectedComponent] instanceof InterfaceDiv || this.components[this.selectedComponent] instanceof InterfaceGrid) {
+				if (this.focus && this.components[this.selectedComponent] instanceof InterfaceParent) {
 					this.focus = false;
 					this.components[this.selectedComponent].focus = true;
 				} else {
