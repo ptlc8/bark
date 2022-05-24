@@ -192,14 +192,15 @@ var game = (async function() {
 })();
 
 var Random = (function() {
-    var Random = function(seed=1) {
-        this.seed = 1;
-    };
-    
-    Random.prototype.next = function() {
-    	var x = Math.sin(this.seed++) * 10000;
-    	return x - Math.floor(x);
-    };
+    class Random {
+        constructor(seed = 1) {
+            this.seed = 1;
+        }
+        next() {
+            var x = Math.sin(this.seed++) * 10000;
+            return x - Math.floor(x);
+        }
+    }
     
     return Random;
 }());
