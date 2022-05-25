@@ -14,12 +14,16 @@ var InterfaceDiv = (function() {
 				return this.components[this.selectedComponent].next();
 			if (++this.selectedComponent >= this.components.length)
 				this.selectedComponent = 0;
+			if (this.onSelect)
+				this.onSelect(this.selectedComponent);
 		}
 		previous() {
 			if (!this.focus)
 				return this.components[this.selectedComponent].previous();
 			if (--this.selectedComponent < 0)
 				this.selectedComponent = this.components.length - 1;
+			if (this.onSelect)
+				this.onSelect(this.selectedComponent);
 		}
 		nextCol() {
 			if (!this.focus)

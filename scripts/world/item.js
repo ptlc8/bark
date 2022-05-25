@@ -1,8 +1,9 @@
 "use strict";
 var Item = (function() {
     class Item {
-        constructor(id, driftingProba = 0) {
+        constructor(id, name, driftingProba = 0) {
             this.id = id;
+            this.name = name;
             this.driftingProba = driftingProba;
         }
     }

@@ -19,7 +19,8 @@ var InterfaceButton = (function() {
 				this.onclick();
 		}
 		draw(renderer, x, y, width) {
-			renderer.drawInterfaceQuad(x, y, width, this.height, this.color);
+			if (this.color)
+				renderer.drawInterfaceQuad(x, y, width, this.height, this.color);
 			renderer.drawText(this.text, this.font, x, y + 0.1 * this.height, this.height * 0.8, this.textColor, "center", "center");
 		}
 		getHeight() {

@@ -24,7 +24,7 @@ var game = (async function() {
         //loadModelFromAssets(modelName).then(model => models[modelName] = model);
     }
     // Création du monde
-    var world = new World(20, [new Item("plank", 8), new Item("bottle", 1), new Item("box", 1)]);
+    var world = new World(20, {plank:new Item("plank", "Planche", 8), bottle:new Item("bottle", "Bouteille", 1), box:new Item("box", "Boîte", 1), boards:new Item("boards", "Planches", 0)});
     world.chunks = {0:{0:{0:[[["boards","boards","boards","cube","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards"],["cube"]],[["boards",undefined,"boards"]]]}}}
     var player = new Alive(world, "cat", [0,1.5,0], 2);
     world.entities.push(player);
@@ -38,6 +38,10 @@ var game = (async function() {
     world.entities.push(new Entity(world, "sea", [0,0,0]));
     var inventory = new Inventory(24,16);
     inventory.add("boards", 4);
+    var crafts = [
+        new Craft("boards", ["plank",4]),
+        new Craft("box", ["plank",24]),
+    ];
     // Gestion des inputs
     var keys = [
         ["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["GamepadAxe1","directionZ"],
@@ -47,7 +51,7 @@ var game = (async function() {
         ["GamepadButton1","action"],["KeyC","action"],
         ["GamepadButton2","inventory"],["KeyE","inventory"],
         ["GamepadButton3","craft"],["KeyR","craft"],
-        ["GamepadButton3","special"],["KeyA","special"],
+        ["GamepadButton3","special"],["KeyQ","special"],
         ["GamepadButton6","run"],["ShiftLeft","run"],
         ["GamepadButton7","jump"],["Space","jump"],
         ["GamepadButton8","zoomout"],["Minus","zoomout"],
@@ -72,9 +76,7 @@ var game = (async function() {
         });
         menu.add(fsButton);
         menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
-        var bButton = new InterfaceButton("B", fonts.Arial, 0.1, [0.2,1,0.2,1]);
-        bButton.setOnClick(()=>interfaceRoot.open("crafting"));
-        menu.add(bButton);
+        menu.add(new InterfaceButton("B", fonts.Arial, 0.1, [0.2,1,0.2,1]));
         menu.add(new InterfaceButton("C", fonts.Arial, 0.1, [0.2,0.2,1,1]));
         interfaceRoot.register("menu", menu);
         // Inventaire
@@ -83,20 +85,34 @@ var game = (async function() {
         var inv = new InterfaceGrid(8);
         inventoryDiv.add(new InterfaceText("Inventaire", fonts.Arial, 0.15));
         inventoryDiv.add(inv);
-        inventoryDiv.add(new InterfaceText("LStick/ZQSD : Déplacer   Y/Space : Selectionner   B/C : Retour", fonts.Arial, 0.05));
+        inventoryDiv.add(new InterfaceText("LStick/ZQSD : Déplacer   Y/C : Selectionner   B/A : Retour", fonts.Arial, 0.05));
         interfaceRoot.register("inventory", inventoryDiv);
         inventoryDiv.setOnRefresh(function() {
             inv.components = [];
             for (let item of inventory)
-            inv.add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
+                inv.add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
         });
         // Crafting
-        var crafting = new InterfaceGrid(2);
+        var preview, craftModelView, craftItemName, recipeDiv, craftingsDiv;
+        var crafting = new InterfaceGrid(2, 1);
         crafting.setVisible(false);
-        crafting.add(new InterfaceModelView());
-        var craftingsDiv = new InterfaceDiv();
-        crafting.add(craftingsDiv);
+        crafting.add(preview = new InterfaceDiv());
+        preview.add(craftModelView = new InterfaceModelView(models["cube"], fonts.Arial, 0.5));
+        preview.add(craftItemName = new InterfaceText("Item name", fonts.Arial, 0.1, [0,0,0,1]));
+        preview.add(recipeDiv = new InterfaceDiv());
+        preview.add(new InterfaceText("Y/C : Fabriquer   B/A : Retour", fonts.Arial, 0.05));
+        crafting.add(craftingsDiv = new InterfaceDiv());
         interfaceRoot.register("crafting", crafting);
+        crafting.setOnRefresh(function() {
+            craftingsDiv.components = [];
+            for (let craft of crafts)
+                craftingsDiv.add(new InterfaceButton(world.items[craft.id].name, fonts.Arial, 0.05, [.4,.4,.4,.8]));
+        });
+        craftingsDiv.setOnSelect(function(index) {
+            let itemId = crafts[index].id;
+            craftModelView.model = models[itemId];
+            craftItemName.text = world.items[itemId].name;
+        });
     }
     
     // Fonction d'avancement du jeu
@@ -150,6 +166,10 @@ var game = (async function() {
             if (inputs.inventory.clicked) { // inventaire
                 InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.open("inventory");
+            }
+            if (inputs.craft.clicked) { // crafting
+                InputsManager.vibrate(80, 1, 0.5);
+                interfaceRoot.open("crafting");
             }
             if (inputs.jump.clicked) { // saut
                 InputsManager.vibrate(80, 1, 0.5);

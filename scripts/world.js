@@ -12,9 +12,9 @@ var World = (function() {
             this.items = items;
             this.driftingItems = [];
             var driftingTotalProba = 0;
-            for (let item of items) {
+            for (const [itemId,item] of Object.entries(items)) {
                 if (item.driftingProba != 0) {
-                    this.driftingItems.push([item.driftingProba, item.id]);
+                    this.driftingItems.push([item.driftingProba, itemId]);
                     driftingTotalProba += item.driftingProba;
                 }
             }

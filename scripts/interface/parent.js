@@ -8,9 +8,12 @@ var InterfaceParent = (function() {
 			this.components = [];
 			this.selectedComponent = transient || 0;
 			this.transient = transient !== undefined;
+			this.onSelect = undefined;
         }
         setFocus(focus = true) {
 			this.focus = focus;
+			if (focus && this.onSelect)
+				this.onSelect(this.selectedComponent);
 			if (this.transient && this.focus)
 				this.click();
 		}
@@ -28,6 +31,9 @@ var InterfaceParent = (function() {
         nextCol() {}
         previousCol() {}
         back() {}
+		setOnSelect(onSelect) {
+			this.onSelect = onSelect;
+		}
     }
     
     return InterfaceParent;
