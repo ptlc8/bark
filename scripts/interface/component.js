@@ -22,7 +22,7 @@ var InterfaceComponent = (function() {
         isVisible() {
             return this.visible;
         }
-        click(x, y, click) {}
+        action(x, y, click) {}
         draw(renderer, x, y, width) {}
         getHeight() {}
     }

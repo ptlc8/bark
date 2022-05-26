@@ -9,14 +9,14 @@ var InterfaceButton = (function() {
 			this.height = height;
 			this.color = color;
 			this.textColor = textColor;
-			this.onclick = undefined;
+			this.onAction = undefined;
 		}
-		setOnClick(onclick) {
-			this.onclick = onclick;
+		setOnAction(onAction) {
+			this.onAction = onAction;
 		}
-		click(x, y, click) {
-			if (this.onclick)
-				this.onclick();
+		action(x, y, click) {
+			if (this.onAction)
+				this.onAction();
 		}
 		draw(renderer, x, y, width) {
 			if (this.color)

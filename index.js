@@ -69,7 +69,7 @@ var game = (async function() {
         menu.setVisible(false);
         menu.add(new InterfaceText("Menu", fonts.Arial, 0.15));
         var fsButton = new InterfaceButton("Plein écran", fonts.Arial, 0.1, [0.5,0.7,1,1]);
-        fsButton.setOnClick(function() {
+        fsButton.setOnAction(function() {
             if (document.fullscreenElement)
                 document.exitFullscreen();
             else cvs.requestFullscreen();
@@ -128,7 +128,7 @@ var game = (async function() {
                 interfaceRoot.next();
             if (inputs.action.clicked) {
                 InputsManager.vibrate(80, 1, 0.5);
-                interfaceRoot.click();
+                interfaceRoot.action();
             }
             if (inputs.special.clicked)
                 interfaceRoot.back();

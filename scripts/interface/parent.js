@@ -15,7 +15,7 @@ var InterfaceParent = (function() {
 			if (focus && this.onSelect)
 				this.onSelect(this.selectedComponent);
 			if (this.transient && this.focus)
-				this.click();
+				this.action();
 		}
 		toggleFocus() {
 			this.setFocus(!this.focus);
@@ -30,7 +30,29 @@ var InterfaceParent = (function() {
         previous() {}
         nextCol() {}
         previousCol() {}
-        back() {}
+		action(button = 0) {
+			if (this.selectedComponent < this.components.length) {
+				if (this.focus && this.components[this.selectedComponent] instanceof InterfaceParent) {
+					this.focus = false;
+					this.components[this.selectedComponent].setFocus(true);
+				} else {
+					this.components[this.selectedComponent].action(button);
+				}
+			}
+		}
+		back() {
+			if (this.focus) {
+				this.focus = false;
+				return true;
+			} else {
+				if (this.components[this.selectedComponent].back()) {
+					if (this.transient)
+						return true;
+					this.focus = true;
+				}
+				return false;
+			}
+		}
 		setOnSelect(onSelect) {
 			this.onSelect = onSelect;
 		}

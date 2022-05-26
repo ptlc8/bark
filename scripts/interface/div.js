@@ -57,29 +57,6 @@ var InterfaceDiv = (function() {
 				height += component.getHeight() + 0.01;
 			return height + 0.04;
 		}
-		click(button = 0) {
-			if (this.selectedComponent < this.components.length) {
-				if (this.focus && this.components[this.selectedComponent] instanceof InterfaceParent) {
-					this.focus = false;
-					this.components[this.selectedComponent].focus = true;
-				} else {
-					this.components[this.selectedComponent].click(button);
-				}
-			}
-		}
-		back() {
-			if (this.focus) {
-				this.focus = false;
-				return true;
-			} else {
-				if (this.components[this.selectedComponent].back()) {
-					if (this.transient)
-						return true;
-					this.focus = true;
-				}
-				return false;
-			}
-		}
 	}
     
     return InterfaceDiv;
