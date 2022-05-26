@@ -56,7 +56,8 @@ var game = (async function() {
         ["GamepadButton5","zoomout"],["Minus","zoomout"],
         ["GamepadButton6","run"],["ShiftLeft","run"],
         ["GamepadButton7","jump"],["Space","jump"],
-        ["GamepadButton9","menu"],["Escape","menu"]
+        ["GamepadButton9","menu"],["Escape","menu"],
+        ["MouseButton0","grab"]
     ];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
@@ -142,7 +143,7 @@ var game = (async function() {
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
             camera.rot[1] += inputs.cameraRotateY.value*delta*4;
-            cvs.style.cursor = inputs.click.pressed ? "grabbing" : "grab";
+            cvs.style.cursor = inputs.grab.pressed ? "grabbing" : "grab";
             if (inputs.zoomout.pressed) // dézoom
                 camera.setDistance(Math.max(-35, camera.position[2]-1));
             if (inputs.zoomin.pressed) // zoom
