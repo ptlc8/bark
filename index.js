@@ -48,16 +48,15 @@ var game = (async function() {
         ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],
         ["GamepadAxe2","cameraRotateY"],["MouseGrabMoveX","cameraRotateY"],
         ["GamepadAxe3","cameraRotateX"],["MouseGrabMoveY","cameraRotateX"],
+        ["GamepadButton0","special"],["KeyQ","special"],
         ["GamepadButton1","action"],["KeyC","action"],
         ["GamepadButton2","inventory"],["KeyE","inventory"],
         ["GamepadButton3","craft"],["KeyR","craft"],
-        ["GamepadButton3","special"],["KeyQ","special"],
+        ["GamepadButton4","zoomin"],["Equal","zoomin"],
+        ["GamepadButton5","zoomout"],["Minus","zoomout"],
         ["GamepadButton6","run"],["ShiftLeft","run"],
         ["GamepadButton7","jump"],["Space","jump"],
-        ["GamepadButton8","zoomout"],["Minus","zoomout"],
-        ["GamepadButton9","zoomin"],["Equal","zoomin"],
-        ["GamepadButton16","menu"],["Escape","menu"],
-        ["MouseButton0","click"],
+        ["GamepadButton9","menu"],["Escape","menu"]
     ];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
