@@ -230,7 +230,7 @@ var Renderer = (function() {
 						if (-5 < cy && cy < 5)
 							for (let cz in world.chunks[cx][cy])
 								if (-5 < cz && cz < 5) {
-									var chunk = world.chunks[cx][cz][cz];
+									var chunk = world.chunks[cx][cy][cz];
 									for (let x in chunk)
 										for (let y in chunk[x])
 											for (let z in chunk[x][y]) {

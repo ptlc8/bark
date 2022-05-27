@@ -24,13 +24,12 @@ var game = (async function() {
     }
     // Création de la partie/monde
     var game = new Game();
-    game.registerItem(new Item("plank", "Planche", 8));
-    game.registerItem(new Item("bottle", "Bouteille", 1));
-    game.registerItem(new Item("box", "Boîte", 1));
-    game.registerItem(new Item("boards", "Planches", 0));
+    game.registerItem(new Item("plank", "Planche", {driftingProba:8}));
+    game.registerItem(new Item("bottle", "Bouteille", {driftingProba:1}));
+    game.registerItem(new Item("box", "Boîte", {driftingProba:1,placeable:true}));
+    game.registerItem(new Item("boards", "Planches", {placeable:true}));
     game.registerCraft(new Craft("boards", 1, {"plank":4}));
     game.registerCraft(new Craft("box", 1, {"plank":24}));
-    game.registerCraft(new Craft("bottle", 24, {"bottle":24,"box":12,plank:1}));
     game.start();
     // Gestion des inputs
     var keys = [
@@ -206,6 +205,9 @@ var game = (async function() {
 		last = now;
 		camera.setTargetPos(game.player.getPos());
 		renderer.drawWorld(game.world, models, camera, deltaTime);
+        var selectedSlot = game.inventory.getSelectedSlot();
+        if (selectedSlot && game.items[selectedSlot.id].placeable)
+            /* TODO: render ghost view of model */;
         interfaceRoot.draw(renderer, 0, 0, 1);
 		renderer.drawText(game.player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
 		renderer.drawText(fps+" fps", fonts.Arial, -1, 0.95, .05, [1,1,1,1], "left", "top");

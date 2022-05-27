@@ -89,6 +89,19 @@ var World = (function() {
         getWindSpeed() {
             return this.windSpeed;
         }
+        setBlock(x, y, z, id) {
+            let cx = Math.floor((x + 0.5) / 16), cy = Math.floor((y + 0.5) / 16), cz = Math.floor((z + 0.5) / 16);
+            if (!this.chunks[cx]) this.chunks[cx] = {};
+            if (!this.chunks[cx][cy]) this.chunks[cx][cy] = {};
+            if (!this.chunks[cx][cy][cz]) this.chunks[cx][cy][cz] = {};
+            let chunk = this.chunks[cx][cy][cz];
+            let lx = mod(Math.round(x), 16), ly = mod(Math.round(y), 16), lz = mod(Math.round(z), 16);
+            if (!chunk[lx]) chunk[lx] = [];
+            if (!chunk[lx][ly]) chunk[lx][ly] = [];
+            if (chunk[lx][ly][lz]) return false;
+            chunk[lx][ly][lz] = id;
+            return true;
+		}
     }
     
     return World;

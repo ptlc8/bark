@@ -7,6 +7,7 @@ var Game = (function(){
             this.sun = null;
             this.items = {};
             this.inventory = new Inventory(24,16);
+            this.inventory.add("boards",4); // TODO: delete
             this.crafts = [];
 		}
         registerItem(item) {
@@ -64,7 +65,23 @@ var Game = (function(){
                     return true;
                 }
             }
-            console.log(this.inventory.getSelectedItemId());
+            // Using item in selected slot
+            var selectedSlot = this.inventory.getSelectedSlot();
+            if (selectedSlot) {
+                var selectedItem = this.items[selectedSlot.id];
+                // Placing item
+                if (selectedItem.placeable) {
+                    var pos = this.player.getBlockPos();
+                    pos[1]--;
+                    var rotY = this.player.rot[1];
+                    pos[0] = Math.round(pos[0] + Math.sin(rotY));
+                    pos[2] = Math.round(pos[2] + Math.cos(rotY));
+                    if (this.world.setBlock(pos[0], pos[1], pos[2], selectedItem.id)) {
+                        this.inventory.remove(selectedItem.id);
+                        return true;
+				    }
+			    }
+            }
             return false;
 		}
         special() {

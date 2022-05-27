@@ -40,6 +40,13 @@ var Entity = (function() {
             this.pos[1] = pos[1];
             this.pos[2] = pos[2];
         }
+        getBlockPos() {
+            return [
+                this.pos[0],
+                this.pos[1],
+                this.pos[2]
+            ];
+        }
         getRot() {
             var p = this.world.getTickProgress();
             return [

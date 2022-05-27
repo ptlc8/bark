@@ -68,7 +68,7 @@ var Inventory = (function() {
         select(slot) {
             this.selectedSlot = slot;
 		}
-        getSelectedItemId() {
+        getSelectedSlot() {
             return this.items[this.selectedSlot];
 		}
     }
