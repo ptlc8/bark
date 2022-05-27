@@ -29,7 +29,7 @@ var World = (function() {
                 var windSin = Math.sin(this.windAngle), windCos = Math.cos(this.windAngle), a = Math.round(Math.random());
                 var spawnPosX = windSin > 0.72 ? 20 : windSin < -0.72 ? -20 : !a ? (windSin < 0 ? -20 : 20) : Math.random() * 40 - 20;
                 var spawnPosZ = windCos > 0.72 ? 20 : windCos < -0.72 ? -20 : a ? (windCos < 0 ? -20 : 20) : Math.random() * 40 - 20;
-                this.entities.push(new DriftingEntity(this, this.getDriftingId(), [spawnPosX, 0.4, spawnPosZ], undefined, 1, { minX: -20, maxX: 20, minZ: -20, maxZ: 20 }));
+                this.entities.unshift(new DriftingEntity(this, this.getDriftingId(), [spawnPosX, 0.4, spawnPosZ], undefined, 1, { minX: -20, maxX: 20, minZ: -20, maxZ: 20 }));
             }
             for (let entity of this.entities)
                 entity.update(delta);

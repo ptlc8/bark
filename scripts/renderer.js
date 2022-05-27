@@ -1,6 +1,8 @@
 "use strict";
 // public
 var Renderer = (function() {
+	// private static tmp
+	var tRef = new Date().getTime();
 	// private static final
 	const vertexShaderSource = `
 	  #define PI 3.1415926538
@@ -21,12 +23,10 @@ var Renderer = (function() {
 	  uniform highp mat4 uViewMatrix; // unused
 	  uniform highp mat4 uCameraMatrix;
 	  uniform highp mat4 uProjectionMatrix;
-	  uniform mediump vec3 uAmbientLight;
-	  uniform mediump vec3 uDirectionalLightColor;
-      uniform highp vec3 uDirectionalLightVector;
 	  
 	  varying mediump vec4 vColor;
-	  varying highp vec3 vLighting;
+	  varying highp vec3 vNormal;
+	  varying highp vec3 vPosition;
 	  
 	  void main() {
 	    highp vec3 vertexPosition = aVertexPosition;
@@ -46,22 +46,44 @@ var Renderer = (function() {
 	    vertexPosition.y *= aVertexScale.y;
 	    vertexPosition.z *= aVertexScale.z;
 	    
-		gl_Position = uProjectionMatrix * uViewMatrix * uCameraMatrix * aVertexTransform * (vec4(vertexPosition, 1.0));
+		highp vec4 vertex = aVertexTransform * (vec4(vertexPosition, 1.0));
+
+		gl_Position = uProjectionMatrix * uViewMatrix * uCameraMatrix * vertex;
 		vColor = aVertexColor;
-		
-		// lighting effect
-		highp float directional = max(0.0, dot(normalize((aVertexTransform * vec4(aVertexNormal, 0.0)).xyz), uDirectionalLightVector));
-		vLighting = uAmbientLight + (uDirectionalLightColor * directional);
+		vNormal = (aVertexTransform * vec4(aVertexNormal, 0.0)).xyz;
+		vPosition = vertex.xyz;
 	  }
 	`;
 	
 	// private static final
 	const fragShaderSource = `
+	  #define PI 3.1415926538
+
+	  uniform mediump vec3 uAmbientLight;
+	  uniform mediump vec3 uDirectionalLightColor;
+      uniform highp vec3 uDirectionalLightVector;
+      uniform highp int uTick;
+
 	  varying mediump vec4 vColor;
-	  varying highp vec3 vLighting;
+	  varying highp vec3 vNormal;
+	  varying highp vec3 vPosition;
 	  
 	  void main() {
-		gl_FragColor = vec4(vColor.xyz*vLighting, vColor.w);
+		highp vec3 normal = normalize(vNormal);
+		highp float tick = float(uTick);
+
+		// waves
+		mediump vec2 timeFactor = vec2(1.0, 1.5);
+		mediump vec2 offsetFactor = vec2(2.5, 1.0);
+		normal.x += sin(mod(tick * timeFactor.x + (vPosition.x + vPosition.z) * offsetFactor.x, 2.0*PI));
+		normal.y += cos(mod(tick * timeFactor.y + (vPosition.x + vPosition.z) * offsetFactor.y, 2.0*PI));
+		normal = normalize(normal);
+
+		// lighting effect
+		highp float directional = max(0.0, dot(normal, uDirectionalLightVector));
+		highp vec3 lighting = uAmbientLight + (uDirectionalLightColor * directional);
+		
+		gl_FragColor = vec4(vColor.xyz*lighting, vColor.w);
 	  }
 	`;
 	
@@ -127,7 +149,8 @@ var Renderer = (function() {
 					viewMatrix: this.gl.getUniformLocation(shaderProgram, "uViewMatrix"),
 					ambientLight: this.gl.getUniformLocation(shaderProgram, "uAmbientLight"),
 					directionalLightColor: this.gl.getUniformLocation(shaderProgram, "uDirectionalLightColor"),
-					directionalLightVector: this.gl.getUniformLocation(shaderProgram, "uDirectionalLightVector")
+					directionalLightVector: this.gl.getUniformLocation(shaderProgram, "uDirectionalLightVector"),
+					tick: this.gl.getUniformLocation(shaderProgram, "uTick")
 				}
 			};
 			this.debug = debug;
@@ -136,7 +159,7 @@ var Renderer = (function() {
 		clear() {
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 		}
-		drawVoxels(buffers, projectionMatrix, viewMatrix, tickProgress, lights = { ambientColor: [0.6, 0.6, 0.6], directionalVector: [0.5, 0.7, 0.5], directionalColor: [0.75, 0.75, 0.75] }, skybox = undefined) {
+		drawVoxels(buffers, projectionMatrix, viewMatrix, tickProgress, lights = { ambientColor: [0.6, 0.6, 0.6], directionalVector: [0.5, 0.7, 0.5], directionalColor: [0.75, 0.75, 0.75] }, tick=0, skybox = undefined) {
 			if (skybox) {
 				this.gl.clearColor(skybox.color[0], skybox.color[1], skybox.color[2], 1.0);
 				this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -207,6 +230,7 @@ var Renderer = (function() {
 			this.gl.uniform3fv(this.programInfo.uniformLocations.ambientLight, lights.ambientColor);
 			this.gl.uniform3fv(this.programInfo.uniformLocations.directionalLightColor, lights.directionalColor);
 			this.gl.uniform3fv(this.programInfo.uniformLocations.directionalLightVector, lights.directionalVector);
+			this.gl.uniform1i(this.programInfo.uniformLocations.tick, tick-tRef);
 
 			/*let i = 0;
 			let facesIndex = 0;
@@ -285,7 +309,7 @@ var Renderer = (function() {
 				transforms: allTransforms,
 				orients: allOrients,
 				scales: allScales
-			}, projectionMatrix, camera.getViewMatrix(world.getTickProgress()), world.getTickProgress(), world.getLights(), world.getSkybox());
+			}, projectionMatrix, camera.getViewMatrix(world.getTickProgress()), world.getTickProgress(), world.getLights(), world.previousTick, world.getSkybox());
 		}
 		drawAxis(rotation) {
 			// Initialisation du programme 
