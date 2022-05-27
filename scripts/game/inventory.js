@@ -5,6 +5,7 @@ var Inventory = (function() {
             this.items = [];
             this.size = size;
             this.stackSize = stackSize;
+            this.selectedSlot = 0;
         }
         add(id, amount = 1) {
             for (let i = 0; i < this.size; i++) {
@@ -64,6 +65,12 @@ var Inventory = (function() {
             this.add(craft.resultItemId, craft.resultAmount);
             return true;
 	    }
+        select(slot) {
+            this.selectedSlot = slot;
+		}
+        getSelectedItemId() {
+            return this.items[this.selectedSlot];
+		}
     }
     
     return Inventory;

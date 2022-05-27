@@ -61,9 +61,10 @@ var Game = (function(){
                 if (entity instanceof DriftingEntity && Math.sqrt(Math.pow(entity.pos[0]-this.player.pos[0],2)+Math.pow(entity.pos[1]-this.player.pos[1],2)+Math.pow(entity.pos[2]-this.player.pos[2],2)) < 1) {
                     this.world.removeEntity(entity);
                     this.inventory.add(entity.itemId, 1);
-                    break;
+                    return;
                 }
             }
+            console.log(this.inventory.getSelectedItemId());
 		}
         special() {
             

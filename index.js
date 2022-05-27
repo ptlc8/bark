@@ -13,7 +13,6 @@ var game = (async function() {
     fonts["Arial"] = await loadFontFromAssets("Arial");
     // Chargement des modèles
     var models = {
-    	player: {voxels:[{pos:[0,0.5,0],scale:[1,1,1],color:[.8,.2,.2,1],rotation:[0,0,0],origin:[0,.5,0]}], scale:.5},
     	cube: {voxels:[{pos:[0,0,0],scale:[1,1,1],color:[1,1,1,1],rotation:[0,0,0],origin:[0,0,0]}], scale:1},
     	sea: {"voxels":[{"pos":[0,.4,0], "scale":[200,0,200], "colors":[null,null,[0,.4,.9,.7],null,null,[0,.4,.9,.7]]}]},
     	ground: {"voxels":[{"pos":[0,0,0], "scale":[200,0.1,200], "colors":[null,null,[0.933, 0.858, 0.647, 1],null,null,[0.768, 0.709, 0.537, 1]]}]},
@@ -80,16 +79,25 @@ var game = (async function() {
         interfaceRoot.register("inventory", inventoryDiv);
         inventoryDiv.setOnRefresh(function() {
             inv.components = [];
-            for (let item of game.inventory)
-                inv.add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
+            let i = 0;
+            for (let item of game.inventory) {
+                let slotView = new InterfaceModelView(item?models[item.id]:undefined, item?item.amount:0, fonts.Arial, 0.1);
+                let index = i;
+                slotView.setOnAction(function(){
+                    game.inventory.select(index);
+                    interfaceRoot.close();
+                });
+                inv.add(slotView);
+                i++;
+            }
         });
         // Crafting
         var preview, craftModelView, craftItemName, recipeDiv, craftingsDiv;
         var crafting = new InterfaceGrid(2, 1);
         crafting.setVisible(false);
         crafting.add(preview = new InterfaceDiv());
-        preview.add(craftModelView = new InterfaceModelView(models["cube"], fonts.Arial, 0.5));
-        preview.add(craftItemName = new InterfaceText("Item name", fonts.Arial, 0.1, [0,0,0,1]));
+        preview.add(craftModelView = new InterfaceModelView(undefined, 0, fonts.Arial, 0.5));
+        preview.add(craftItemName = new InterfaceText("", fonts.Arial, 0.1, [0,0,0,1]));
         preview.add(recipeDiv = new InterfaceDiv());
         preview.add(new InterfaceText("Y/C : Fabriquer   B/A : Retour", fonts.Arial, 0.05));
         crafting.add(craftingsDiv = new InterfaceDiv());
@@ -109,6 +117,7 @@ var game = (async function() {
         function updateCraftView(index) {
             let craft = game.crafts[index];
             craftModelView.model = models[craft.resultItemId];
+            craftModelView.amount = craft.resultAmount;
             craftItemName.text = game.items[craft.resultItemId].name;
             recipeDiv.components = [];
             for (const [id,amount] of Object.entries(craft.ingredients)) {
@@ -153,7 +162,7 @@ var game = (async function() {
                 InputsManager.vibrate(80, 1, 0.5);
                 game.action();
             }
-            if (inputs.action.clicked) { // special
+            if (inputs.special.clicked) { // special
                 InputsManager.vibrate(80, 1, 0.5);
                 game.special();
             }
