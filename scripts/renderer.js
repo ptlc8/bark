@@ -542,7 +542,7 @@ var Renderer = (function() {
 
 			getModelBuffers({ allColors, allNormals, allTransforms, allOrients, allScales }, model, transform, undefined);
 
-			const projectionMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+			const projectionMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -0.01, 0, 0, 0, -0.02, 1];
 
 			this.drawVoxels({
 				colors: allColors,
