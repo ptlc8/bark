@@ -14,9 +14,11 @@ var InterfaceButton = (function() {
 		setOnAction(onAction) {
 			this.onAction = onAction;
 		}
-		action(x, y, click) {
-			if (this.onAction)
-				this.onAction();
+		action(button) {
+			if (this.onAction) {
+				return this.onAction(button);
+			}
+			return false;
 		}
 		draw(renderer, x, y, width) {
 			if (this.color)

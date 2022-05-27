@@ -63,6 +63,7 @@ var game = (async function() {
             if (document.fullscreenElement)
                 document.exitFullscreen();
             else cvs.requestFullscreen();
+            return true;
         });
         menu.add(fsButton);
         menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
@@ -86,6 +87,7 @@ var game = (async function() {
                 slotView.setOnAction(function(){
                     game.inventory.select(index);
                     interfaceRoot.close();
+                    return true;
                 });
                 inv.add(slotView);
                 i++;
@@ -107,8 +109,9 @@ var game = (async function() {
             for (let craft of game.crafts) {
                 let craftButton = new InterfaceButton(game.items[craft.resultItemId].name, fonts.Arial, 0.05, [.4,.4,.4,.8]);
                 craftButton.setOnAction(function(){
-                    console.log(game.inventory.craft(craft));
+                    var result = game.inventory.craft(craft);
                     updateCraftView(craftingsDiv.selectedComponent);
+                    return result;
                 });
                 craftingsDiv.add(craftButton);
             }
@@ -137,8 +140,7 @@ var game = (async function() {
             if (inputs.directionZ.value>0 && inputs.directionZ.clicked)
                 interfaceRoot.next();
             if (inputs.action.clicked) {
-                InputsManager.vibrate(80, 1, 0.5);
-                interfaceRoot.action();
+                interfaceRoot.action(0) && InputsManager.vibrate(80, 1, 0.5);
             }
             if (inputs.special.clicked)
                 interfaceRoot.back();
@@ -147,8 +149,8 @@ var game = (async function() {
             if (inputs.directionX.value>0 && inputs.directionX.clicked)
                 interfaceRoot.nextCol();
             if (inputs.menu.clicked) {
-                InputsManager.vibrate(80, 1, 0.5);
                 interfaceRoot.close();
+                InputsManager.vibrate(80, 1, 0.5);
             }
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
@@ -159,12 +161,10 @@ var game = (async function() {
             if (inputs.zoomin.pressed) // zoom
                 camera.setDistance(Math.min(-5, camera.position[2]+1));
             if (inputs.action.clicked) { // action
-                InputsManager.vibrate(80, 1, 0.5);
-                game.action();
+                game.action() && InputsManager.vibrate(80, 1, 0.5);
             }
             if (inputs.special.clicked) { // special
-                InputsManager.vibrate(80, 1, 0.5);
-                game.special();
+                game.special() && InputsManager.vibrate(80, 1, 0.5);
             }
             if (inputs.menu.clicked) { // menu
                 InputsManager.vibrate(80, 1, 0.5);
@@ -179,8 +179,7 @@ var game = (async function() {
                 interfaceRoot.open("crafting");
             }
             if (inputs.jump.clicked) { // saut
-                InputsManager.vibrate(80, 1, 0.5);
-                game.jump();
+                game.jump() && InputsManager.vibrate(80, 1, 0.5);
             }
         	if (inputs.directionX.value!=0 || inputs.directionZ.value!=0) {
         	    game.move(delta, inputs.directionX.value, inputs.directionZ.value, inputs.run.pressed, camera.rot[1]);

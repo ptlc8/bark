@@ -36,8 +36,8 @@ var InterfaceRoot = (function() {
 		add(component) {
 			this.components.push(component);
 		}
-        action(x, y, click) {
-            this.components[this.selectedComponent].action(x, y, click);
+        action(button) {
+            return this.components[this.selectedComponent].action(button);
         }
         draw(renderer, x, y, width) {
             for (var component of this.components)

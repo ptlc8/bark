@@ -30,15 +30,16 @@ var InterfaceParent = (function() {
         previous() {}
         nextCol() {}
         previousCol() {}
-		action(button = 0) {
+		action(button) {
 			if (this.selectedComponent < this.components.length) {
 				if (this.focus && this.components[this.selectedComponent] instanceof InterfaceParent) {
 					this.focus = false;
 					this.components[this.selectedComponent].setFocus(true);
 				} else {
-					this.components[this.selectedComponent].action(button);
+					return this.components[this.selectedComponent].action(button);
 				}
 			}
+			return false;
 		}
 		back() {
 			if (this.focus) {

@@ -15,9 +15,10 @@ var InterfaceModelView = (function() {
 		setOnAction(onAction) {
 			this.onAction = onAction;
 		}
-		action(x, y, click) {
+		action(button) {
 			if (this.onAction)
-				this.onAction();
+				return this.onAction(button);
+			return false;
 		}
 		draw(renderer, x, y, width) {
 			renderer.drawInterfaceQuad(x, y, this.model ? width : width / 2, this.model ? this.size : this.size / 2, this.color);
