@@ -23,25 +23,16 @@ var game = (async function() {
         models[modelName] = await loadModelFromAssets(modelName);
         //loadModelFromAssets(modelName).then(model => models[modelName] = model);
     }
-    // Création du monde
-    var world = new World(20, {plank:new Item("plank", "Planche", 8), bottle:new Item("bottle", "Bouteille", 1), box:new Item("box", "Boîte", 1), boards:new Item("boards", "Planches", 0)});
-    world.chunks = {0:{0:{0:[[["boards","boards","boards","cube","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards","boards"],["cube"]],[["boards",undefined,"boards"]]]}}}
-    var player = new Alive(world, "cat", [0,1.5,0], 2);
-    world.entities.push(player);
-    for (let i = 0; i < 3; i++)
-        world.entities.push(new FlyingEntity(world, "sardine", [0,-1,0], "swim", 1, 6, {minX:-20, maxX:20, minY:-9.5, maxY:.2, minZ:-20, maxZ:20}));
-    world.entities.push(new FlyingEntity(world, "bee", [0,2,0], "fly", 1, 2, {minX:-20, maxX:20, minY:0.5, maxY:4, minZ:-20, maxZ:20}));
-    world.entities.push(new DriftingEntity(world, "plank", [4,0.4,1], undefined, 1, {minX:-20, maxX:20, minZ:-20, maxZ:20}));
-    world.entities.push(new Entity(world, "ground", [0,-10,0]));
-    var sun = new Entity(world, "sun", [50,0,0]);
-    world.entities.push(sun);
-    world.entities.push(new Entity(world, "sea", [0,0,0]));
-    var inventory = new Inventory(24,16);
-    inventory.add("boards", 4);
-    var crafts = [
-        new Craft("boards", ["plank",4]),
-        new Craft("box", ["plank",24]),
-    ];
+    // Création de la partie/monde
+    var game = new Game();
+    game.registerItem(new Item("plank", "Planche", 8));
+    game.registerItem(new Item("bottle", "Bouteille", 1));
+    game.registerItem(new Item("box", "Boîte", 1));
+    game.registerItem(new Item("boards", "Planches", 0));
+    game.registerCraft(new Craft("boards", 1, {"plank":4}));
+    game.registerCraft(new Craft("box", 1, {"plank":24}));
+    game.registerCraft(new Craft("bottle", 24, {"bottle":24,"box":12,plank:1}));
+    game.start();
     // Gestion des inputs
     var keys = [
         ["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["GamepadAxe1","directionZ"],
@@ -89,7 +80,7 @@ var game = (async function() {
         interfaceRoot.register("inventory", inventoryDiv);
         inventoryDiv.setOnRefresh(function() {
             inv.components = [];
-            for (let item of inventory)
+            for (let item of game.inventory)
                 inv.add(new InterfaceModelView(item?models[item.id]:undefined, fonts.Arial, 0.1));
         });
         // Crafting
@@ -105,22 +96,32 @@ var game = (async function() {
         interfaceRoot.register("crafting", crafting);
         crafting.setOnRefresh(function() {
             craftingsDiv.components = [];
-            for (let craft of crafts)
-                craftingsDiv.add(new InterfaceButton(world.items[craft.id].name, fonts.Arial, 0.05, [.4,.4,.4,.8]));
+            for (let craft of game.crafts) {
+                let craftButton = new InterfaceButton(game.items[craft.resultItemId].name, fonts.Arial, 0.05, [.4,.4,.4,.8]);
+                craftButton.setOnAction(function(){
+                    console.log(game.inventory.craft(craft));
+                    updateCraftView(craftingsDiv.selectedComponent);
+                });
+                craftingsDiv.add(craftButton);
+            }
         });
-        craftingsDiv.setOnSelect(function(index) {
-            let itemId = crafts[index].id;
-            craftModelView.model = models[itemId];
-            craftItemName.text = world.items[itemId].name;
-        });
+        craftingsDiv.setOnSelect(updateCraftView);
+        function updateCraftView(index) {
+            let craft = game.crafts[index];
+            craftModelView.model = models[craft.resultItemId];
+            craftItemName.text = game.items[craft.resultItemId].name;
+            recipeDiv.components = [];
+            for (const [id,amount] of Object.entries(craft.ingredients)) {
+                recipeDiv.add(new InterfaceText(game.items[id].name+" x"+amount, fonts.Arial, 0.05, game.inventory.has(id,amount)?[0,1,0,1]:[1,0,0,1]));
+			}
+        }
     }
     
     // Fonction d'avancement du jeu
     function update(delta) { // delta en s
-        world.update(delta);
+        game.update(delta);
         camera.update();
         var inputs = inputsManager.getInputs();
-        sun.setPos(world.getSunPos());
         if (interfaceRoot.isFocus())  {
             if (inputs.directionZ.value<0 && inputs.directionZ.clicked)
                 interfaceRoot.previous();
@@ -150,14 +151,11 @@ var game = (async function() {
                 camera.setDistance(Math.min(-5, camera.position[2]+1));
             if (inputs.action.clicked) { // action
                 InputsManager.vibrate(80, 1, 0.5);
-                console.log("ACTION");
-                for (let entity of world.entities) {
-                    if (entity instanceof DriftingEntity && Math.sqrt(Math.pow(entity.pos[0]-player.pos[0],2)+Math.pow(entity.pos[1]-player.pos[1],2)+Math.pow(entity.pos[2]-player.pos[2],2)) < 1) {
-                        world.removeEntity(entity);
-                        inventory.add(entity.itemId, 1);
-                        break;
-                    }
-                }
+                game.action();
+            }
+            if (inputs.action.clicked) { // special
+                InputsManager.vibrate(80, 1, 0.5);
+                game.special();
             }
             if (inputs.menu.clicked) { // menu
                 InputsManager.vibrate(80, 1, 0.5);
@@ -173,39 +171,14 @@ var game = (async function() {
             }
             if (inputs.jump.clicked) { // saut
                 InputsManager.vibrate(80, 1, 0.5);
-                var groundY = world.getGround(...player.pos);
-                if (groundY && groundY==player.pos[1])
-                    player.pos[1]++;
+                game.jump();
             }
         	if (inputs.directionX.value!=0 || inputs.directionZ.value!=0) {
-        	    var inWater = world.isWater(...player.pos);
-        		player.rot[1] = (Math.atan2(inputs.directionX.value, inputs.directionZ.value)-camera.rot[1]);
-        		let dx = Math.sin(player.rot[1])*player.speed*delta*(inputs.run.pressed&&!inWater?1.5:1);
-        		let dz = Math.cos(player.rot[1])*player.speed*delta*(inputs.run.pressed&&!inWater?1.5:1);
-        		if (world.getBlock(player.pos[0]+dx, player.pos[1]+0.6, player.pos[2])!==undefined)
-        		    dx = 0;
-        		if (world.getBlock(player.pos[0], player.pos[1]+0.6, player.pos[2]+dz)!==undefined)
-        		    dz = 0;
-        		if (dx!==0 || dz!==0) {
-            		player.pos[0] += dx;
-        		    player.pos[2] += dz;
-        		    player.setAnim(inWater?"swim":inputs.run.pressed?"run":"walk");
-        		} else {
-        		    player.setAnim(world.isWater(...player.pos)?"idle-swim":"idle");
-        		}
+        	    game.move(delta, inputs.directionX.value, inputs.directionZ.value, inputs.run.pressed, camera.rot[1]);
         	} else {
-        	    player.setAnim(world.isWater(...player.pos)?"idle-swim":"idle");
+        	    game.dontmove();
         	}
         }
-    	
-    	var groundHeight = world.getGround(...player.pos);
-    	if (world.isWater(...player.pos)) { // nage
-    	    if (player.pos[1]<-0) player.pos[1] = 0; // ~~~
-    	} else if (groundHeight===undefined || groundHeight<player.pos[1]) {
-    	    player.pos[1] -= .1*20*delta;
-    	} else if (groundHeight>player.pos[1]) {
-    	    player.pos[1] = groundHeight;
-    	}
     }
     
     // fonction de rendu
@@ -213,8 +186,8 @@ var game = (async function() {
 	var fps;
 	var frames = 0;
 	function render(now) {
-	    while (world.previousTick+1000/world.tps <= Date.now())
-			update(1/world.tps);
+	    while (game.world.previousTick+1000/game.world.tps <= Date.now())
+			update(1/game.world.tps);
 		if (now-(now%1000) > last-(last%1000)) {
 		    fps = frames;
 		    frames = 0;
@@ -223,10 +196,10 @@ var game = (async function() {
 		frames++;
 		const deltaTime = now - last;
 		last = now;
-		camera.setTargetPos(player.getPos());
-		renderer.drawWorld(world, models, camera, deltaTime);
+		camera.setTargetPos(game.player.getPos());
+		renderer.drawWorld(game.world, models, camera, deltaTime);
         interfaceRoot.draw(renderer, 0, 0, 1);
-		renderer.drawText(player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
+		renderer.drawText(game.player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
 		renderer.drawText(fps+" fps", fonts.Arial, -1, 0.95, .05, [1,1,1,1], "left", "top");
 		
 		requestAnimationFrame(render);

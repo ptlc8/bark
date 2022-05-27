@@ -1,9 +1,10 @@
 "use strict";
 var Craft = (function() {
     class Craft {
-        constructor(id, ...items) {
-            this.id = id;
-            this.items = items;
+        constructor(resultItemId, resultAmount, ingredients={}) {
+            this.resultItemId = resultItemId;
+            this.resultAmount = resultAmount;
+            this.ingredients = ingredients;
         }
     }
     

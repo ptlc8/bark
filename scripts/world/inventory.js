@@ -24,7 +24,7 @@ var Inventory = (function() {
         count(id) {
             var count = 0;
             for (let item of this.items) {
-                if (item)
+                if (item && item.id==id)
                     count += item.amount;
             }
             return count;
@@ -52,6 +52,18 @@ var Inventory = (function() {
             for (let i = 0; i < this.size; i++)
                 yield this.items[i];
         }
+        craft(craft) {
+            for (let [itemId,amount] of Object.entries(craft.ingredients)) {
+                if (!this.has(itemId, amount)) {
+                    return false;     
+			    }
+		    }
+            for (let [itemId,amount] of Object.entries(craft.ingredients)) {
+                this.remove(itemId, amount);
+		    }
+            this.add(craft.resultItemId, craft.resultAmount);
+            return true;
+	    }
     }
     
     return Inventory;

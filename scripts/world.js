@@ -1,7 +1,7 @@
 "use strict";
 var World = (function() {
     class World {
-        constructor(tps, items = []) {
+        constructor(tps, driftingItems = []) {
             this.tps = tps;
             this.previousTick = Date.now();
             this.chunks = {};
@@ -9,18 +9,7 @@ var World = (function() {
             this.time = parseInt(Date.now() / 1000 / 60 % (60 * 24)); // 0: minuit, 720: midi ; max:1440
             this.windAngle = 0; // par rapport au nord, sens trigo
             this.windSpeed = 5; // 20 km/h 
-            this.items = items;
-            this.driftingItems = [];
-            var driftingTotalProba = 0;
-            for (const [itemId,item] of Object.entries(items)) {
-                if (item.driftingProba != 0) {
-                    this.driftingItems.push([item.driftingProba, itemId]);
-                    driftingTotalProba += item.driftingProba;
-                }
-            }
-            for (let drifting of this.driftingItems) {
-                drifting[0] /= driftingTotalProba;
-            }
+            this.driftingItems = driftingItems;
         }
         getTickProgress() {
             return (Date.now() - this.previousTick) / (1000 / this.tps);
