@@ -213,6 +213,8 @@ var game = (async function() {
 		requestAnimationFrame(render);
 	}
 	requestAnimationFrame(render);
+
+    return game;
 })();
 
 var Random = (function() {
