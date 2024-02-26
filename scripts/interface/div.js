@@ -2,7 +2,7 @@
 // public
 var InterfaceDiv = (function() {
     class InterfaceDiv extends InterfaceParent {
-		constructor(color = [0.6, 0.6, 0.6, 0.8], transient = undefined) {
+		constructor(transient = undefined, color = [0.6, 0.6, 0.6, 0.8]) {
 			super(transient);
 			this.color = color;
 		}

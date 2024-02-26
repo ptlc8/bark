@@ -32,11 +32,11 @@
     game.registerCraft(new Craft("box", 1, {"plank":24}));
     game.start();
     // Gestion des inputs
-    var keys = [
-        ["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["GamepadAxe1","directionZ"],
-        ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["GamepadAxe0","directionX"],
-        ["GamepadAxe2","cameraRotateY"],["MouseGrabMoveX","cameraRotateY"],
-        ["GamepadAxe3","cameraRotateX"],["MouseGrabMoveY","cameraRotateX"],
+    var mapping = [
+        ["KeyW","-directionZ"],["ArrowUp","-directionZ"], ["KeyS","+directionZ"],["ArrowDown","+directionZ"], ["-GamepadAxe1","-directionZ"],["+GamepadAxe1","+directionZ"],
+        ["KeyA","-directionX"],["ArrowLeft","-directionX"], ["KeyD","+directionX"],["ArrowRight","+directionX"], ["-GamepadAxe0","-directionX"],["+GamepadAxe0","+directionX"],
+        ["-GamepadAxe2","-cameraRotateY"],["-MouseGrabMoveX","-cameraRotateY"], ["+GamepadAxe2","+cameraRotateY"],["+MouseGrabMoveX","+cameraRotateY"],
+        ["-GamepadAxe3","-cameraRotateX"],["-MouseGrabMoveY","-cameraRotateX"], ["+GamepadAxe3","+cameraRotateX"],["+MouseGrabMoveY","+cameraRotateX"],
         ["GamepadButton0","special"],["KeyQ","special"],
         ["GamepadButton1","action"],["KeyC","action"],
         ["GamepadButton2","inventory"],["KeyE","inventory"],
@@ -47,10 +47,15 @@
         ["GamepadButton7","jump"],["Space","jump"],
         ["GamepadButton9","menu"],["Escape","menu"]
     ];
-    var inputsManager = new InputsManager(keys, cvs);
+    var inputsManager = new InputsManager(mapping, cvs);
+    var inputsNames = {
+        "-directionZ":"Avancer", "+directionZ":"Reculer", "-directionX":"Gauche", "+directionX":"Droite",
+        "-cameraRotateY":"Regarder haut", "+cameraRotateY":"Regarder bas", "-cameraRotateX":"Regarder gauche", "+cameraRotateX":"Regarder droite",
+        "special":"Spécial", "action":"Action", "inventory":"Inventaire", "craft":"Craft",
+        "zoomin":"Zoom +", "zoomout":"Zoom -", "run":"Courir", "jump":"Sauter", "menu":"Menu"
+    };
     // Création des interfaces
     var interfaceRoot = new InterfaceRoot();
-    window.interfaceRoot = interfaceRoot;
     {
         // Menu principal
         var menu = new InterfaceDiv();
@@ -67,13 +72,33 @@
         menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
         var inputsButton = new InterfaceButton("Contrôles", fonts.Arial, 0.1, [0.2,1,0.2,1]);
         inputsButton.setOnAction(function() {
-            
+            interfaceRoot.open("inputs");
         });
         menu.add(inputsButton);
-        menu.add(new InterfaceButton("C", fonts.Arial, 0.1, [0.2,0.2,1,1]));
+        menu.add(new InterfaceButton("Ambi.dev", fonts.Arial, 0.1, [0.2,0.2,1,1]));
         interfaceRoot.register("menu", menu);
+        // Contrôles
+        var controlsDiv = new InterfaceDiv(1);
+        controlsDiv.setVisible(false);
+        controlsDiv.add(new InterfaceText("Contrôles", fonts.Arial, 0.1));
+        var inputsDiv = new InterfaceGrid(2);
+        controlsDiv.add(inputsDiv);
+        for (let index in mapping) {
+            let [key, input] = mapping[index];
+            let changeKeyButton = new InterfaceButton(inputsNames[input] + " : " + InputsManager.getKeyName(key), fonts.Arial, 0.05);
+            inputsDiv.add(changeKeyButton);
+            changeKeyButton.setOnAction(function() {
+                changeKeyButton.text = "Appuyez sur une touche";
+                inputsManager.scan().then(newKey => {
+                    inputsManager.setKey(index, newKey, input)
+                    changeKeyButton.text = inputsNames[input] + " : " + InputsManager.getKeyName(newKey);
+                });
+                return true;
+            });
+        }
+        interfaceRoot.register("inputs", controlsDiv);
         // Inventaire
-        var inventoryDiv = new InterfaceDiv(undefined, 1);
+        var inventoryDiv = new InterfaceDiv(1);
         inventoryDiv.setVisible(false);
         var inv = new InterfaceGrid(8);
         inventoryDiv.add(new InterfaceText("Inventaire", fonts.Arial, 0.15));
@@ -157,10 +182,10 @@
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
             camera.rot[1] += inputs.cameraRotateY.value*delta*4;
-            cvs.style.cursor = inputsManager.grabbing ? "grabbing" : "grab";
-            if (inputs.zoomout.pressed) // dézoom
+            cvs.style.cursor = inputsManager.isGrabbing() ? "grabbing" : "grab";
+            if (inputs.zoomout.value != 0) // dézoom
                 camera.setDistance(Math.max(-35, camera.position[2]-1));
-            if (inputs.zoomin.pressed) // zoom
+            if (inputs.zoomin.value != 0) // zoom
                 camera.setDistance(Math.min(-5, camera.position[2]+1));
             if (inputs.action.clicked) { // action
                 game.action() && InputsManager.vibrate(80, 1, 0.5);
@@ -184,7 +209,7 @@
                 game.jump() && InputsManager.vibrate(80, 1, 0.5);
             }
         	if (inputs.directionX.value!=0 || inputs.directionZ.value!=0) {
-        	    game.move(delta, inputs.directionX.value, inputs.directionZ.value, inputs.run.pressed, camera.rot[1]);
+        	    game.move(delta, inputs.directionX.value, inputs.directionZ.value, inputs.run.value != 0, camera.rot[1]);
         	} else {
         	    game.dontmove();
         	}
