@@ -12,7 +12,7 @@ var Game = (function(){
 		}
         registerItem(item) {
             if (this.items[item.id])
-                console.error("Cet item est déjà enregistré : "+item.id);
+                console.error("Cet item est dÃ©jÃ  enregistrÃ© : "+item.id);
 			else
                 this.items[item.id] = item;
 		}

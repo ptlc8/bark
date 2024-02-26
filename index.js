@@ -1,5 +1,5 @@
 "use strict";
-var game = (async function() {
+(async function() {
     // Affichage
     var cvs = document.getElementById("aff");
     var renderer = new Renderer(cvs, true);
@@ -45,8 +45,7 @@ var game = (async function() {
         ["GamepadButton5","zoomout"],["Minus","zoomout"],
         ["GamepadButton6","run"],["ShiftLeft","run"],
         ["GamepadButton7","jump"],["Space","jump"],
-        ["GamepadButton9","menu"],["Escape","menu"],
-        ["MouseButton0","grab"]
+        ["GamepadButton9","menu"],["Escape","menu"]
     ];
     var inputsManager = new InputsManager(keys, cvs);
     // Création des interfaces
@@ -66,7 +65,11 @@ var game = (async function() {
         });
         menu.add(fsButton);
         menu.add(new InterfaceButton("FPS : auto", fonts.Arial, 0.1, [1,0.2,0.2,1]));
-        menu.add(new InterfaceButton("B", fonts.Arial, 0.1, [0.2,1,0.2,1]));
+        var inputsButton = new InterfaceButton("Contrôles", fonts.Arial, 0.1, [0.2,1,0.2,1]);
+        inputsButton.setOnAction(function() {
+            
+        });
+        menu.add(inputsButton);
         menu.add(new InterfaceButton("C", fonts.Arial, 0.1, [0.2,0.2,1,1]));
         interfaceRoot.register("menu", menu);
         // Inventaire
@@ -154,7 +157,7 @@ var game = (async function() {
         } else {
             camera.rot[0] = Math.min(Math.PI/2, Math.max(-Math.PI/2, camera.rot[0]+inputs.cameraRotateX.value*delta*2));
             camera.rot[1] += inputs.cameraRotateY.value*delta*4;
-            cvs.style.cursor = inputs.grab.pressed ? "grabbing" : "grab";
+            cvs.style.cursor = inputsManager.grabbing ? "grabbing" : "grab";
             if (inputs.zoomout.pressed) // dézoom
                 camera.setDistance(Math.max(-35, camera.position[2]-1));
             if (inputs.zoomin.pressed) // zoom
@@ -193,12 +196,12 @@ var game = (async function() {
 	var fps;
 	var frames = 0;
 	function render(now) {
-	    while (game.world.previousTick+1000/game.world.tps <= Date.now())
-			update(1/game.world.tps);
-		if (now-(now%1000) > last-(last%1000)) {
+	    while (game.world.previousTick + 1000 / game.world.tps <= Date.now())
+			update(1 / game.world.tps);
+		if (now - (now % 1000) > last - (last % 1000)) {
 		    fps = frames;
 		    frames = 0;
-		    document.title = fps+" FPS";
+		    document.title = fps + " FPS";
 		}
 		frames++;
 		const deltaTime = now - last;
@@ -209,7 +212,7 @@ var game = (async function() {
         if (selectedSlot && game.items[selectedSlot.id].placeable)
             /* TODO: render ghost view of model */;
         interfaceRoot.draw(renderer, 0, 0, 1);
-		renderer.drawText(game.player.pos.map(n=>new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1,1,1,1], "left", "top");
+		renderer.drawText(game.player.pos.map(n => new Number(n).toFixed(3)).join(" ; "), fonts.Arial, -1, 1, .05, [1, 1, 1, 1], "left", "top");
 		renderer.drawText(fps+" fps", fonts.Arial, -1, 0.95, .05, [1,1,1,1], "left", "top");
 		
 		requestAnimationFrame(render);
@@ -217,7 +220,7 @@ var game = (async function() {
 	requestAnimationFrame(render);
 
     return game;
-})();
+})().then(game => globalThis.game = game);
 
 var Random = (function() {
     class Random {
