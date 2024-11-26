@@ -4,4 +4,4 @@ Ce projet est une sandbox en 3D, on contrôle un personnage dans un monde entour
 
 Ce projet utilise WebGL
 
-![Capture d'écran](screenshot.jpg)
+![Capture d'écran](src/assets/screenshot.jpg)
